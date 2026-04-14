@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>UNSA Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--cyan:#04B3DE;--cyan-light:#E8F7FC;--cyan-dark:#037A99;--mag:#EE0A9F;--mag-light:#FDF0F7;--mag-dark:#A8076F;--white:#FFF;--g50:#FAFBFC;--g100:#F4F5F7;--g200:#E8EAED;--g300:#D1D5DB;--g400:#9CA3AF;--g500:#6B7280;--g600:#4B5563;--g700:#374151;--g800:#1F2937;--g900:#111827;--r-sm:8px;--r-md:14px;--r-lg:20px;--r-xl:28px;--sh-sm:0 2px 8px rgba(0,0,0,.05);--tr:.28s cubic-bezier(.4,0,.2,1);}
+*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'DM Sans',sans-serif;background:var(--g50);color:var(--g800);}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-card{background:var(--white);border-radius:var(--r-xl);padding:44px;max-width:380px;width:100%;box-shadow:var(--sh-sm);text-align:center;}
+.login-card h2{font-family:'Outfit';font-weight:900;font-size:26px;color:var(--g900);margin-bottom:4px;}
+.login-card .sub{font-size:13px;color:var(--g400);margin-bottom:24px;}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:12px;text-align:left;}
+.fg label{font-family:'Outfit';font-weight:600;font-size:11px;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;}
+.input{width:100%;border:2px solid var(--g200);border-radius:var(--r-sm);padding:11px 15px;font-family:'DM Sans';font-size:14px;color:var(--g800);outline:none;transition:var(--tr);background:var(--g50);}.input:focus{border-color:var(--cyan);background:var(--white);}
+textarea.input{resize:vertical;min-height:80px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border:none;border-radius:var(--r-md);font-family:'Outfit';font-weight:700;font-size:14px;cursor:pointer;transition:var(--tr);width:100%;}
+.btn-cyan{background:var(--cyan);color:var(--white);}.btn-cyan:hover{background:var(--cyan-dark);}
+.btn-outline{background:var(--white);color:var(--g600);border:2px solid var(--g200);}.btn-outline:hover{border-color:var(--g300);}
+.btn-sm{padding:8px 16px;font-size:12px;}.btn-xs{padding:6px 12px;font-size:11px;}
+.err{color:var(--mag);font-size:12px;margin-bottom:8px;display:none;}
+.admin-wrap{display:none;min-height:100vh;}.admin-wrap.show{display:flex;}
+.sidebar{width:240px;background:var(--white);border-right:1px solid var(--g200);padding:20px 0;position:fixed;top:0;bottom:0;overflow-y:auto;}
+.sb-brand{padding:0 20px 18px;border-bottom:1px solid var(--g200);margin-bottom:14px;}.sb-brand h3{font-family:'Outfit';font-weight:800;font-size:16px;color:var(--g900);}.sb-brand span{font-size:11px;color:var(--g400);}
+.sb-user{padding:10px 20px;display:flex;align-items:center;gap:9px;margin-bottom:6px;}
+.sb-av{width:32px;height:32px;border-radius:50%;background:var(--cyan-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--cyan-dark);font-family:'Outfit';}
+.sb-un{font-family:'Outfit';font-weight:600;font-size:13px;color:var(--g800);}.sb-ur{font-size:10px;color:var(--g400);}
+.sb-nav{flex:1;padding:0 10px;}.sb-nav a{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:var(--r-sm);font-family:'Outfit';font-weight:500;font-size:13px;color:var(--g500);text-decoration:none;cursor:pointer;transition:var(--tr);margin-bottom:2px;}.sb-nav a:hover{background:var(--g100);color:var(--g800);}.sb-nav a.active{background:var(--cyan-light);color:var(--cyan-dark);font-weight:600;}
+.sb-nav .badge{background:var(--mag);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;margin-left:auto;}
+.sb-foot{padding:14px 20px;border-top:1px solid var(--g200);}
+.content{margin-left:240px;flex:1;padding:28px;}.content-inner{max-width:860px;}
+.panel{display:none;}.panel.active{display:block;animation:fi .3s ease;}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.panel-hd{margin-bottom:28px;}.panel-hd h2{font-family:'Outfit';font-weight:800;font-size:26px;color:var(--g900);margin-bottom:4px;}.panel-hd p{font-size:13px;color:var(--g400);}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+.stat-card{background:var(--white);border:1px solid var(--g200);border-radius:var(--r-md);padding:18px;text-align:center;}
+.stat-num{font-family:'Outfit';font-weight:900;font-size:28px;letter-spacing:-1px;}.stat-lbl{font-size:11px;color:var(--g400);margin-top:3px;}
+.card{background:var(--white);border:1px solid var(--g200);border-radius:var(--r-lg);padding:20px;margin-bottom:14px;transition:var(--tr);}.card:hover{box-shadow:var(--sh-sm);}
+.card-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.card-title{font-family:'Outfit';font-weight:700;font-size:15px;color:var(--g900);}.card-meta{font-size:11px;color:var(--g400);margin-top:2px;}
+.card-body{font-size:13px;color:var(--g600);line-height:1.6;}
+.badge-s{font-family:'Outfit';font-weight:700;font-size:10px;padding:3px 10px;border-radius:100px;text-transform:uppercase;}
+.b-pending{background:#FEF3C7;color:#92400E;}.b-approved{background:#D1FAE5;color:#065F46;}.b-rejected{background:#FEE2E2;color:#991B1B;}.b-answered{background:#D1FAE5;color:#065F46;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+/* MSG ADMIN */
+.conv-list{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+.conv-item{background:var(--white);border:1px solid var(--g200);border-radius:var(--r-md);padding:14px;cursor:pointer;transition:var(--tr);display:flex;align-items:center;gap:12px;}
+.conv-item:hover{border-color:var(--cyan);box-shadow:var(--sh-sm);}
+.conv-item.active{border-color:var(--cyan);background:var(--cyan-light);}
+.conv-av{width:36px;height:36px;border-radius:50%;background:var(--g100);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--g600);font-family:'Outfit';flex-shrink:0;}
+.conv-info{flex:1;min-width:0;}.conv-name{font-family:'Outfit';font-weight:700;font-size:13px;color:var(--g900);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.conv-preview{font-size:11px;color:var(--g400);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.conv-time{font-size:10px;color:var(--g400);flex-shrink:0;}
+.msg-area{background:var(--white);border:1px solid var(--g200);border-radius:var(--r-lg);overflow:hidden;display:none;}.msg-area.show{display:flex;flex-direction:column;height:500px;}
+.msg-a-header{padding:14px 18px;border-bottom:1px solid var(--g200);font-family:'Outfit';font-weight:700;font-size:15px;color:var(--g900);}
+.msg-a-list{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:6px;}
+.msg-bubble{max-width:70%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.5;}
+.msg-mine{background:var(--cyan);color:var(--white);align-self:flex-end;border-bottom-right-radius:4px;}
+.msg-theirs{background:var(--g100);color:var(--g800);align-self:flex-start;border-bottom-left-radius:4px;}
+.msg-meta{display:flex;align-items:center;gap:4px;margin-top:3px;}.msg-time{font-size:9px;opacity:.5;}
+.msg-a-input{padding:12px 16px;border-top:1px solid var(--g200);display:flex;gap:8px;}
+.msg-a-input input{flex:1;border:2px solid var(--g200);border-radius:20px;padding:9px 16px;font-family:'DM Sans';font-size:13px;outline:none;}.msg-a-input input:focus{border-color:var(--cyan);}
+.msg-a-input button{width:38px;height:38px;border-radius:50%;background:var(--cyan);color:var(--white);border:none;font-size:16px;cursor:pointer;}
+@media(max-width:768px){.sidebar{width:100%;position:relative;border-right:none;border-bottom:1px solid var(--g200);}.content{margin-left:0;}.admin-wrap.show{flex-direction:column;}.stats-row{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+<div class="login-wrap" id="loginWrap">
+<div class="login-card">
+<h2>Administration</h2><div class="sub">UNSA Énergie — Île et Armor</div>
+<div class="fg"><label>Email</label><input class="input" id="lEmail" type="email" value="aurelien.herbin@grdf.fr"/></div>
+<div class="fg"><label>Mot de passe</label><input class="input" id="lPwd" type="password" onkeydown="if(event.key==='Enter')adminLogin()"/></div>
+<div class="err" id="lErr"></div>
+<button class="btn btn-cyan" onclick="adminLogin()">Connexion</button>
+<div style="margin-top:14px;"><a href="index.html" style="font-size:12px;color:var(--g400);text-decoration:none;">← Retour au site</a></div>
+</div>
+</div>
+<div class="admin-wrap" id="adminWrap">
+<div class="sidebar">
+<div class="sb-brand"><h3>UNSA Admin</h3><span>Île et Armor</span></div>
+<div class="sb-user"><div class="sb-av" id="sbAv">AH</div><div><div class="sb-un" id="sbName">Admin</div><div class="sb-ur">Administrateur</div></div></div>
+<div class="sb-nav">
+<a class="active" onclick="showP('dash',this)">📊 Dashboard</a>
+<a onclick="showP('questions',this)">💬 Questions <span class="badge" id="qBadge">0</span></a>
+<a onclick="showP('verifs',this)">✅ Vérifications <span class="badge" id="vBadge">0</span></a>
+<a onclick="showP('messages',this)">💬 Messages</a>
+<a onclick="showP('actus',this)">📰 Actualités</a>
+</div>
+<div class="sb-foot"><button class="btn btn-outline btn-sm" onclick="adminLogout()">Déconnexion</button></div>
+</div>
+<div class="content"><div class="content-inner">
+<!-- DASHBOARD -->
+<div class="panel active" id="pan-dash">
+<div class="panel-hd"><h2>Dashboard</h2></div>
+<div class="stats-row"><div class="stat-card"><div class="stat-num" style="color:var(--cyan);" id="sTotal">0</div><div class="stat-lbl">Questions</div></div><div class="stat-card"><div class="stat-num" style="color:#F59E0B;" id="sPend">0</div><div class="stat-lbl">En attente</div></div><div class="stat-card"><div class="stat-num" style="color:var(--mag);" id="sVerifs">0</div><div class="stat-lbl">Vérifications</div></div><div class="stat-card"><div class="stat-num" style="color:#10B981;" id="sUsers">0</div><div class="stat-lbl">Utilisateurs</div></div></div>
+<h3 style="font-family:'Outfit';font-weight:700;font-size:16px;margin-bottom:14px;">Questions récentes</h3>
+<div id="dashRecent"></div>
+</div>
+<!-- QUESTIONS -->
+<div class="panel" id="pan-questions"><div class="panel-hd"><h2>Questions</h2></div><div id="qList"></div></div>
+<!-- VERIFICATIONS -->
+<div class="panel" id="pan-verifs"><div class="panel-hd"><h2>Vérifications d'adhérents</h2><p>Validez ou refusez les demandes de vérification.</p></div><div id="vList"></div></div>
+<!-- MESSAGES -->
+<div class="panel" id="pan-messages"><div class="panel-hd"><h2>Messages</h2></div><div class="conv-list" id="convList"></div><div class="msg-area" id="msgArea"><div class="msg-a-header" id="msgHeader"></div><div class="msg-a-list" id="msgAList"></div><div class="msg-a-input"><input id="msgAIn" placeholder="Répondre..." onkeydown="if(event.key==='Enter')adminSendMsg()"/><button onclick="adminSendMsg()">➤</button></div></div></div>
+<!-- ACTUS -->
+<div class="panel" id="pan-actus">
+<div class="panel-hd"><h2>Actualités</h2></div>
+<div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Nouvelle actualité</h4><div class="fg"><label>Titre</label><input class="input" id="nActuTitle"/></div><div class="fg"><label>Contenu</label><textarea class="input" id="nActuText"></textarea></div><div class="fg"><label>Tag</label><input class="input" id="nActuTag" placeholder="Salaires, Télétravail..."/></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addActu()">Publier</button></div>
+<div id="actusList" style="margin-top:18px;"></div>
+</div>
+</div></div>
+</div>
+<script>
+const sb=supabase.createClient("https://aiafvjhiprdldtwmktur.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYWZ2amhpcHJkbGR0d21rdHVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMTYzMzcsImV4cCI6MjA4NjU5MjMzN30.YP9_K6srLfHq86EsD4E-StRx_UJxwoboDz3Er4tw2yk");
+let adminUser=null,adminProfile=null,activeConvId=null,adminMsgChannel=null;
+
+async function adminLogin(){
+  const email=document.getElementById('lEmail').value.trim();
+  const pwd=document.getElementById('lPwd').value;
+  const {data,error}=await sb.auth.signInWithPassword({email,password:pwd});
+  if(error){document.getElementById('lErr').textContent=error.message;document.getElementById('lErr').style.display='block';return;}
+  adminUser=data.user;
+  const {data:prof}=await sb.from('unsa_profiles').select('*').eq('id',adminUser.id).single();
+  if(!prof||!['admin','representant'].includes(prof.role)){document.getElementById('lErr').textContent='Accès non autorisé.';document.getElementById('lErr').style.display='block';await sb.auth.signOut();return;}
+  adminProfile=prof;
+  document.getElementById('sbName').textContent=prof.prenom+' '+prof.nom;
+  document.getElementById('sbAv').textContent=(prof.prenom[0]+prof.nom[0]).toUpperCase();
+  document.getElementById('loginWrap').style.display='none';
+  document.getElementById('adminWrap').classList.add('show');
+  loadDash();
+}
+async function adminLogout(){await sb.auth.signOut();location.reload();}
+function showP(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('pan-'+id).classList.add('active');document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');if(id==='dash')loadDash();if(id==='questions')loadQs();if(id==='verifs')loadVerifs();if(id==='messages')loadConvs();if(id==='actus')loadActus();}
+function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+async function loadDash(){
+  const {count:total}=await sb.from('unsa_questions').select('*',{count:'exact',head:true});
+  const {count:pend}=await sb.from('unsa_questions').select('*',{count:'exact',head:true}).eq('status','pending');
+  const {count:verifs}=await sb.from('unsa_membership_verifications').select('*',{count:'exact',head:true}).eq('status','pending');
+  const {count:users}=await sb.from('unsa_profiles').select('*',{count:'exact',head:true});
+  document.getElementById('sTotal').textContent=total||0;
+  document.getElementById('sPend').textContent=pend||0;
+  document.getElementById('sVerifs').textContent=verifs||0;
+  document.getElementById('sUsers').textContent=users||0;
+  document.getElementById('qBadge').textContent=pend||0;
+  document.getElementById('vBadge').textContent=verifs||0;
+  const {data:recent}=await sb.from('unsa_questions').select('*,unsa_profiles(prenom,nom,email)').order('created_at',{ascending:false}).limit(5);
+  document.getElementById('dashRecent').innerHTML=(recent||[]).map(q=>renderQCard(q)).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune question.</div>';
+}
+
+async function loadQs(){
+  const {data}=await sb.from('unsa_questions').select('*,unsa_profiles(prenom,nom,email,telephone,metier)').order('created_at',{ascending:false});
+  document.getElementById('qList').innerHTML=(data||[]).map(q=>renderQCard(q,true)).join('');
+}
+
+function renderQCard(q,full){
+  const p=q.unsa_profiles||{};
+  const name=(p.prenom||'')+' '+(p.nom||'');
+  const cls=q.status==='answered'?'b-answered':'b-pending';
+  const txt=q.status==='answered'?'Répondue':'En attente';
+  return `<div class="card"><div class="card-hd"><div><div class="card-title">${esc(q.theme)} — ${esc(name)}</div><div class="card-meta">${esc(p.email||'')} · ${esc(p.metier||'')} · Spécialiste: ${esc(q.representant)}</div></div><span class="badge-s ${cls}">${txt}</span></div><div class="card-body">${esc(q.question_text)}</div>${full?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--g100);">${q.response?`<div style="background:var(--g50);padding:12px;border-radius:var(--r-sm);font-size:13px;margin-bottom:8px;">💬 ${esc(q.response)}</div>`:``}<textarea class="input" id="resp-${q.id}" placeholder="Votre réponse..." style="min-height:60px;">${q.response||''}</textarea><button class="btn btn-cyan btn-sm" style="width:auto;margin-top:6px;" onclick="respondQ('${q.id}')">${q.response?'Modifier':'Répondre'}</button></div>`:''}</div>`;
+}
+
+async function respondQ(qId){
+  const txt=document.getElementById('resp-'+qId).value.trim();
+  if(!txt)return;
+  await sb.from('unsa_questions').update({response:txt,status:'answered',responded_by:adminUser.id,responded_at:new Date().toISOString()}).eq('id',qId);
+  loadQs();loadDash();
+}
+
+async function loadVerifs(){
+  const {data}=await sb.from('unsa_membership_verifications').select('*,unsa_profiles(prenom,nom,email)').order('created_at',{ascending:false});
+  document.getElementById('vList').innerHTML=(data||[]).map(v=>{
+    const p=v.unsa_profiles||{};const cls=v.status==='pending'?'b-pending':v.status==='approved'?'b-approved':'b-rejected';
+    return `<div class="card"><div class="card-hd"><div><div class="card-title">${esc((p.prenom||'')+' '+(p.nom||''))}</div><div class="card-meta">${esc(p.email||'')} · N° ${esc(v.numero_adherent)}</div></div><span class="badge-s ${cls}">${v.status}</span></div>${v.status==='pending'?`<div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-cyan btn-xs" style="width:auto;background:#10B981;" onclick="verifAction('${v.id}','${v.user_id}','approved')">✅ Approuver</button><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="verifAction('${v.id}','${v.user_id}','rejected')">❌ Refuser</button></div>`:''}</div>`;
+  }).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune demande.</div>';
+}
+
+async function verifAction(vId,userId,status){
+  await sb.from('unsa_membership_verifications').update({status,reviewed_by:adminUser.id,reviewed_at:new Date().toISOString()}).eq('id',vId);
+  if(status==='approved'){
+    await sb.from('unsa_profiles').update({is_adherent:true,adherent_verified:true}).eq('id',userId);
+  }
+  loadVerifs();loadDash();
+}
+
+// MESSAGES ADMIN
+async function loadConvs(){
+  const {data}=await sb.from('unsa_conversations').select('*,unsa_profiles!unsa_conversations_user_id_fkey(prenom,nom,email)').order('last_message_at',{ascending:false});
+  document.getElementById('convList').innerHTML=(data||[]).map(c=>{
+    const p=c.unsa_profiles||{};const name=(p.prenom||'')+' '+(p.nom||'');
+    const time=c.last_message_at?new Date(c.last_message_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+    return `<div class="conv-item${activeConvId===c.id?' active':''}" onclick="openConv('${c.id}','${esc(name)}')"><div class="conv-av">${(p.prenom||'?')[0].toUpperCase()}</div><div class="conv-info"><div class="conv-name">${esc(name)}</div><div class="conv-preview">${esc(c.subject||'')}</div></div><div class="conv-time">${time}</div></div>`;
+  }).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune conversation.</div>';
+}
+
+async function openConv(cId,name){
+  activeConvId=cId;
+  document.getElementById('msgArea').classList.add('show');
+  document.getElementById('msgHeader').textContent='💬 '+name;
+  document.querySelectorAll('.conv-item').forEach(c=>c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  await loadAdminMsgs();
+  // Subscribe
+  if(adminMsgChannel)adminMsgChannel.unsubscribe();
+  adminMsgChannel=sb.channel('admin-msgs-'+cId).on('postgres_changes',{event:'*',schema:'public',table:'unsa_messages',filter:'conversation_id=eq.'+cId},()=>loadAdminMsgs()).subscribe();
+  // Mark as delivered
+  await sb.from('unsa_messages').update({status:'delivered'}).eq('conversation_id',cId).neq('sender_id',adminUser.id).eq('status','sent');
+}
+
+async function loadAdminMsgs(){
+  if(!activeConvId)return;
+  const {data}=await sb.from('unsa_messages').select('*').eq('conversation_id',activeConvId).order('created_at',{ascending:true});
+  const list=document.getElementById('msgAList');
+  list.innerHTML=(data||[]).map(m=>{
+    const mine=m.sender_id===adminUser.id;
+    const time=new Date(m.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    const si=m.status==='read'?'✓✓':m.status==='delivered'?'✓✓':'✓';
+    const sc=m.status==='read'?'color:#10B981':m.status==='delivered'?'color:var(--cyan)':'color:var(--g400)';
+    return `<div class="msg-bubble ${mine?'msg-mine':'msg-theirs'}">${esc(m.content)}<div class="msg-meta"><span class="msg-time">${time}</span>${mine?`<span style="font-size:10px;${sc}">${si}</span>`:''}</div></div>`;
+  }).join('');
+  list.scrollTop=list.scrollHeight;
+  // Mark received msgs as read
+  await sb.from('unsa_messages').update({status:'read'}).eq('conversation_id',activeConvId).neq('sender_id',adminUser.id).neq('status','read');
+}
+
+async function adminSendMsg(){
+  const input=document.getElementById('msgAIn');
+  const txt=input.value.trim();if(!txt||!activeConvId)return;input.value='';
+  await sb.from('unsa_messages').insert({conversation_id:activeConvId,sender_id:adminUser.id,content:txt,status:'sent'});
+  await sb.from('unsa_conversations').update({last_message_at:new Date().toISOString(),admin_id:adminUser.id}).eq('id',activeConvId);
+  loadAdminMsgs();
+}
+
+async function loadActus(){
+  const {data}=await sb.from('unsa_actus').select('*').order('created_at',{ascending:false});
+  document.getElementById('actusList').innerHTML=(data||[]).map(a=>`<div class="card"><div class="card-hd"><div><div class="card-title">${esc(a.title)}</div><div class="card-meta">${new Date(a.created_at).toLocaleDateString('fr-FR')} · ${esc(a.tag||'')}</div></div><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);" onclick="delActu('${a.id}')">Supprimer</button></div><div class="card-body">${esc(a.content)}</div></div>`).join('');
+}
+async function addActu(){
+  const title=document.getElementById('nActuTitle').value.trim();
+  const content=document.getElementById('nActuText').value.trim();
+  const tag=document.getElementById('nActuTag').value.trim();
+  if(!title||!content)return alert('Titre et contenu requis.');
+  await sb.from('unsa_actus').insert({title,content,tag,created_by:adminUser.id});
+  document.getElementById('nActuTitle').value='';document.getElementById('nActuText').value='';document.getElementById('nActuTag').value='';
+  loadActus();
+}
+async function delActu(id){if(!confirm('Supprimer ?'))return;await sb.from('unsa_actus').delete().eq('id',id);loadActus();}
+
+// Auto-login check
+(async function(){
+  const {data}=await sb.auth.getSession();
+  if(data.session){
+    adminUser=data.session.user;
+    const {data:prof}=await sb.from('unsa_profiles').select('*').eq('id',adminUser.id).single();
+    if(prof&&['admin','representant'].includes(prof.role)){
+      adminProfile=prof;
+      document.getElementById('sbName').textContent=prof.prenom+' '+prof.nom;
+      document.getElementById('sbAv').textContent=(prof.prenom[0]+prof.nom[0]).toUpperCase();
+      document.getElementById('loginWrap').style.display='none';
+      document.getElementById('adminWrap').classList.add('show');
+      loadDash();
+    }
+  }
+})();
+</script>
+</body>
+</html>
