@@ -136,7 +136,16 @@ async function adminLogout(){await sb.auth.signOut();location.reload();}
 function showP(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('pan-'+id).classList.add('active');document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');if(id==='dash')loadDash();if(id==='questions')loadQs();if(id==='verifs')loadVerifs();if(id==='messages')loadConvs();if(id==='actus')loadActus();}
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 
+// Cache profiles for merging
+let profilesCache={};
+async function loadAllProfiles(){
+  const {data}=await sb.from('unsa_profiles').select('id,prenom,nom,email,telephone,metier');
+  profilesCache={};
+  (data||[]).forEach(p=>profilesCache[p.id]=p);
+}
+
 async function loadDash(){
+  await loadAllProfiles();
   const {count:total}=await sb.from('unsa_questions').select('*',{count:'exact',head:true});
   const {count:pend}=await sb.from('unsa_questions').select('*',{count:'exact',head:true}).eq('status','pending');
   const {count:nonVerified}=await sb.from('unsa_profiles').select('*',{count:'exact',head:true}).eq('adherent_verified',false).eq('role','user');
@@ -147,18 +156,19 @@ async function loadDash(){
   document.getElementById('sUsers').textContent=users||0;
   document.getElementById('qBadge').textContent=pend||0;
   document.getElementById('vBadge').textContent=nonVerified||0;
-  const {data:recent}=await sb.from('unsa_questions').select('*,unsa_profiles(prenom,nom,email)').order('created_at',{ascending:false}).limit(5);
+  const {data:recent}=await sb.from('unsa_questions').select('*').order('created_at',{ascending:false}).limit(5);
   document.getElementById('dashRecent').innerHTML=(recent||[]).map(q=>renderQCard(q)).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune question.</div>';
 }
 
 async function loadQs(){
-  const {data}=await sb.from('unsa_questions').select('*,unsa_profiles(prenom,nom,email,telephone,metier)').order('created_at',{ascending:false});
-  document.getElementById('qList').innerHTML=(data||[]).map(q=>renderQCard(q,true)).join('');
+  await loadAllProfiles();
+  const {data}=await sb.from('unsa_questions').select('*').order('created_at',{ascending:false});
+  document.getElementById('qList').innerHTML=(data||[]).map(q=>renderQCard(q,true)).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune question.</div>';
 }
 
 function renderQCard(q,full){
-  const p=q.unsa_profiles||{};
-  const name=(p.prenom||'')+' '+(p.nom||'');
+  const p=profilesCache[q.user_id]||{};
+  const name=((p.prenom||'')+ ' '+(p.nom||'')).trim()||'Utilisateur';
   const cls=q.status==='answered'?'b-answered':'b-pending';
   const txt=q.status==='answered'?'Répondue':'En attente';
   const attachHTML=q.response_attachment_url?`<div style="margin-top:6px;"><a href="${esc(q.response_attachment_url)}" target="_blank" style="font-size:12px;color:var(--cyan);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">📎 ${esc(q.response_attachment_name||'Pièce jointe')}</a></div>`:'';
@@ -202,9 +212,10 @@ async function toggleAdherent(userId,approve){
 
 // MESSAGES ADMIN
 async function loadConvs(){
-  const {data}=await sb.from('unsa_conversations').select('*,unsa_profiles!unsa_conversations_user_id_fkey(prenom,nom,email)').order('last_message_at',{ascending:false});
+  await loadAllProfiles();
+  const {data}=await sb.from('unsa_conversations').select('*').order('last_message_at',{ascending:false});
   document.getElementById('convList').innerHTML=(data||[]).map(c=>{
-    const p=c.unsa_profiles||{};const name=(p.prenom||'')+' '+(p.nom||'');
+    const p=profilesCache[c.user_id]||{};const name=((p.prenom||'')+' '+(p.nom||'')).trim()||'Utilisateur';
     const time=c.last_message_at?new Date(c.last_message_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
     return `<div class="conv-item${activeConvId===c.id?' active':''}" onclick="openConv('${c.id}','${esc(name)}')"><div class="conv-av">${(p.prenom||'?')[0].toUpperCase()}</div><div class="conv-info"><div class="conv-name">${esc(name)}</div><div class="conv-preview">${esc(c.subject||'')}</div></div><div class="conv-time">${time}</div></div>`;
   }).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune conversation.</div>';
