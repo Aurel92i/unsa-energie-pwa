@@ -292,6 +292,7 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 <!-- RDV --><div class="page" id="p-rdv"><div class="section-wrap" style="padding-top:44px;"><div class="section-header" style="text-align:center;"><h2>Prendre rendez-vous</h2><p style="margin:0 auto;">Gratuit et confidentiel. Minimum 7 jours de préavis.</p></div><div style="max-width:680px;margin:0 auto;"><div class="calendar-wrap"><div class="cal-header"><h4 id="calMonth"></h4><div class="cal-nav"><button onclick="prevM()">‹</button><button onclick="nextM()">›</button></div></div><div class="cal-days"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div><div class="cal-grid" id="calGrid"></div></div><div class="time-slots" id="timeSlots" style="align-items:center;"><div class="fg" style="margin-bottom:0;flex:1;min-width:200px;"><label>Heure souhaitée</label><input class="input" type="time" id="timePicker" min="08:00" max="18:00" value="10:00" step="900" style="font-family:'Outfit';font-weight:600;"/></div><button class="btn btn-cyan btn-sm" style="width:auto;margin-top:18px;" onclick="confirmTime()">Valider l'heure</button></div><div class="rdv-form" id="rdvForm"><div class="rdv-summary"><div class="s-icon">📅</div><div class="s-detail"><strong id="rdvDateLbl"></strong><span id="rdvTimeLbl"></span></div></div><div class="form-row"><div class="fg"><label>Prénom</label><input class="input" id="rdvP"/></div><div class="fg"><label>Nom</label><input class="input" id="rdvN"/></div></div><div class="form-row"><div class="fg"><label>Email</label><input class="input" id="rdvE" type="email"/></div><div class="fg"><label>Téléphone</label><input class="input" id="rdvT"/></div></div><div class="fg"><label>Motif</label><input class="input" id="rdvM"/></div><button class="btn btn-cyan" onclick="submitRdv()">Confirmer</button><div class="success-msg" id="rdvOk"><div class="success-check">✓</div><h4>RDV demandé</h4><p>Confirmation par email.</p></div></div></div></div></div>
 <!-- IEG --><div class="page" id="p-ieg"><div class="section-wrap" style="padding-top:44px;"><div class="ieg-hero"><h2>Avantages IEG</h2><p>Offres négociées pour les salariés et retraités des IEG.</p><a href="https://avantagesieg.com/" target="_blank" class="ieg-link">Découvrir →</a></div><div class="section-header"><h2>En un coup d'œil</h2></div><div class="ieg-grid"><div class="ieg-card"><div class="ic-icon">✈️</div><h4>Voyages & Séjours</h4><p>Offres négociées sur séjours, circuits et croisières.</p></div><div class="ieg-card"><div class="ic-icon">🎭</div><h4>Spectacles & Cinéma</h4><p>Tarifs préférentiels pour vos sorties.</p></div><div class="ieg-card"><div class="ic-icon">🛒</div><h4>Shopping</h4><p>Réductions et offres partenaires.</p></div><div class="ieg-card"><div class="ic-icon">🏋️</div><h4>Sport & Bien-être</h4><p>Réductions sur vos abonnements.</p></div><div class="ieg-card"><div class="ic-icon">🍽️</div><h4>Restauration</h4><p>Avantages sur la restauration.</p></div><div class="ieg-card"><div class="ic-icon">🚗</div><h4>Mobilité</h4><p>Offres location et assurance.</p></div></div></div></div>
 <!-- MESSAGES --><div class="page" id="p-messages"><div class="section-wrap" style="padding-top:44px;"><div id="msgContent"></div></div></div>
+<!-- QUESTIONS --><div class="page" id="p-questions"><div class="section-wrap" style="padding-top:44px;"><div class="section-header"><h2>Mes questions</h2><p>Vos questions et les réponses de nos représentants.</p></div><div id="questionsPageContent"></div></div></div>
 <!-- PROFIL --><div class="page" id="p-profil"><div class="section-wrap" style="padding-top:44px;"><div class="section-header" style="text-align:center;"><h2>Mon profil</h2></div><div class="profile-wrap"><div style="text-align:center;margin-bottom:28px;"><div class="profile-avatar" id="profAvatar" onclick="document.getElementById('photoIn').click()">👤</div><input type="file" id="photoIn" accept="image/*" style="display:none;" onchange="uploadPhoto(event)"/><div style="font-size:12px;color:var(--cyan);font-weight:600;cursor:pointer;font-family:'Outfit';" onclick="document.getElementById('photoIn').click()">Changer la photo</div><div class="badge-area" id="badgeArea"></div></div><div class="profile-section"><h4>Informations</h4><div class="form-row"><div class="fg"><label>Prénom</label><input class="input" id="profPrenom" oninput="saveProf()"/></div><div class="fg"><label>Nom</label><input class="input" id="profNom" oninput="saveProf()"/></div></div><div class="form-row"><div class="fg"><label>Email</label><input class="input" id="profEmail" disabled/></div><div class="fg"><label>Téléphone</label><input class="input" id="profTel" oninput="saveProf()"/></div></div><div class="form-row"><div class="fg"><label>Métier</label><input class="input" id="profMetier" oninput="saveProf()"/></div><div class="fg"><label>Agence</label><input class="input" id="profAgence" value="Ille et Armor" oninput="saveProf()"/></div></div></div><div class="profile-section"><h4>Mes questions & réponses</h4><div id="profQuestions"></div></div><div style="text-align:center;margin-top:18px;"><button class="btn btn-outline btn-sm" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="doLogout()">Déconnexion</button></div></div></div></div>
 </main>
 <div class="footer"><div class="footer-inner"><div class="footer-brand">UNSA <em>Énergie</em></div><div class="footer-info">Ille et Armor</div><div class="footer-links"><a onclick="goTo('about')">Qui sommes-nous</a><a href="admin.html">Admin</a></div></div></div>
@@ -438,6 +439,7 @@ function buildNav(){
     ['accueil','Accueil'],
     ['actus','Actus'],
     ['about','Qui sommes-nous'],
+    ['questions','Questions'],
     ['rdv','RDV',(!adh&&rdvCountYear>=1)?'nav-locked':''],
     ['ieg','Avantages IEG'],
     ['messages','💬 Messages',!adh?'nav-locked':''],
@@ -464,7 +466,8 @@ function goTo(id,el){
   if(el)el.classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
   if(id==='messages')loadMessages();
-  if(id==='profil')loadProfileQuestions();
+  if(id==='profil'){loadProfileQuestions();loadProfile();}
+  if(id==='questions')loadQuestionsPage();
   if(id==='actus')loadActus();
   // Dynamic lock banners for non-adherents
   updateLockBanners();
@@ -520,32 +523,38 @@ async function sendQ(){
   const txt=document.getElementById('qText').value.trim();
   if(!txt||!selTheme)return;
   await sb.from('unsa_questions').insert({user_id:user.id,theme:selTheme.label,theme_id:selTheme.id,representant:selTheme.rep,question_text:txt});
-  // Email
-  const n=(profile.prenom+' '+profile.nom).trim();
-  const s=encodeURIComponent('[UNSA] '+selTheme.label+' — '+n);
-  const b=encodeURIComponent('Thème: '+selTheme.label+'\nSpécialiste: '+selTheme.rep+'\n\nDe: '+n+' ('+profile.email+')\nTél: '+(profile.telephone||'—')+'\nMétier: '+(profile.metier||'—')+'\n\n'+txt);
-  window.open('mailto:aurelien.herbin@grdf.fr?subject='+s+'&body='+b,'_self');
   questionUsed=true;qCountYear++;buildNav();showStep('qStep3');
+  document.getElementById('qText').value='';
 }
 async function loadProfileQuestions(){
   if(!user)return;
   const {data}=await sb.from('unsa_questions').select('*').eq('user_id',user.id).order('created_at',{ascending:false});
   const el=document.getElementById('profQuestions');
   if(!data||data.length===0){el.innerHTML='<div class="no-data">Aucune question posée.</div>';return;}
-  el.innerHTML=data.map(q=>{
-    const hasResp=q.status==='answered'&&q.response;
-    const attachHTML=q.response_attachment_url?`<a href="${esc(q.response_attachment_url)}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--cyan);text-decoration:none;margin-top:6px;padding:6px 12px;background:var(--cyan-light);border-radius:var(--r-sm);">📎 ${esc(q.response_attachment_name||'Document joint')}</a>`:'';
-    return `<div class="response-card" style="${hasResp?'border-left:3px solid var(--cyan);':'border-left:3px solid #F59E0B;'}">
-      <div class="rc-q"><strong>${esc(q.theme)}</strong> — ${esc(q.question_text)}</div>
-      <div class="rc-meta">Posée le ${new Date(q.created_at).toLocaleDateString('fr-FR')}</div>
-      ${hasResp?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--g100);">
-        <div style="font-size:11px;color:var(--cyan);font-weight:600;font-family:'Outfit';text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Réponse de l'UNSA</div>
-        <div class="rc-a">${esc(q.response)}</div>
-        ${attachHTML}
-        <div class="rc-meta">Répondu le ${new Date(q.responded_at).toLocaleDateString('fr-FR')}</div>
-      </div>`:'<div style="margin-top:8px;font-size:12px;color:#F59E0B;font-weight:600;">⏳ En attente de réponse</div>'}
-    </div>`;
-  }).join('');
+  el.innerHTML=data.slice(0,3).map(q=>renderUserQuestion(q)).join('')+
+    (data.length>3?'<div style="text-align:center;margin-top:12px;"><button class="btn btn-outline btn-sm" style="width:auto;" onclick="goTo(\'questions\')">Voir toutes mes questions →</button></div>':'');
+}
+async function loadQuestionsPage(){
+  if(!user)return;
+  const {data}=await sb.from('unsa_questions').select('*').eq('user_id',user.id).order('created_at',{ascending:false});
+  const el=document.getElementById('questionsPageContent');
+  if(!data||data.length===0){el.innerHTML='<div style="text-align:center;padding:40px 0;"><div style="font-size:40px;margin-bottom:12px;">💬</div><p style="font-size:14px;color:var(--g400);margin-bottom:16px;">Vous n\'avez pas encore posé de question.</p><button class="btn btn-cyan" style="width:auto;" onclick="openQuestion()">Poser une question</button></div>';return;}
+  el.innerHTML=data.map(q=>renderUserQuestion(q)).join('');
+}
+function renderUserQuestion(q){
+  const hasResp=q.status==='answered'&&q.response;
+  const attachHTML=q.response_attachment_url?`<a href="${esc(q.response_attachment_url)}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--cyan);text-decoration:none;margin-top:8px;padding:8px 14px;background:var(--cyan-light);border-radius:var(--r-sm);transition:var(--tr);">📎 ${esc(q.response_attachment_name||'Document joint')}</a>`:'';
+  return `<div class="response-card" style="border-left:3px solid ${hasResp?'var(--cyan)':'#F59E0B'};">
+    <div class="rc-q"><strong>${esc(q.theme)}</strong></div>
+    <div style="font-size:14px;color:var(--g700);margin:8px 0;line-height:1.6;">${esc(q.question_text)}</div>
+    <div class="rc-meta">Posée le ${new Date(q.created_at).toLocaleDateString('fr-FR')}</div>
+    ${hasResp?`<div style="margin-top:12px;padding:14px;background:var(--g50);border-radius:var(--r-sm);">
+      <div style="font-size:11px;color:var(--cyan);font-weight:600;font-family:'Outfit';text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Réponse de l'UNSA</div>
+      <div style="font-size:14px;color:var(--g800);line-height:1.65;">${esc(q.response)}</div>
+      ${attachHTML}
+      <div class="rc-meta" style="margin-top:8px;">Répondu le ${new Date(q.responded_at).toLocaleDateString('fr-FR')}</div>
+    </div>`:'<div style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#F59E0B;font-weight:600;background:#FEF3C7;padding:6px 12px;border-radius:var(--r-sm);">⏳ En attente de réponse</div>'}
+  </div>`;
 }
 
 // ═══ MESSAGES ═══
