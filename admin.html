@@ -85,7 +85,7 @@ textarea.input{resize:vertical;min-height:80px;}
 <div class="sb-nav">
 <a class="active" onclick="showP('dash',this)">📊 Dashboard</a>
 <a onclick="showP('questions',this)">💬 Questions <span class="badge" id="qBadge">0</span></a>
-<a onclick="showP('verifs',this)">✅ Vérifications <span class="badge" id="vBadge">0</span></a>
+<a onclick="showP('verifs',this)">👥 Adhérents <span class="badge" id="vBadge">0</span></a>
 <a onclick="showP('messages',this)">💬 Messages</a>
 <a onclick="showP('actus',this)">📰 Actualités</a>
 </div>
@@ -95,14 +95,14 @@ textarea.input{resize:vertical;min-height:80px;}
 <!-- DASHBOARD -->
 <div class="panel active" id="pan-dash">
 <div class="panel-hd"><h2>Dashboard</h2></div>
-<div class="stats-row"><div class="stat-card"><div class="stat-num" style="color:var(--cyan);" id="sTotal">0</div><div class="stat-lbl">Questions</div></div><div class="stat-card"><div class="stat-num" style="color:#F59E0B;" id="sPend">0</div><div class="stat-lbl">En attente</div></div><div class="stat-card"><div class="stat-num" style="color:var(--mag);" id="sVerifs">0</div><div class="stat-lbl">Vérifications</div></div><div class="stat-card"><div class="stat-num" style="color:#10B981;" id="sUsers">0</div><div class="stat-lbl">Utilisateurs</div></div></div>
+<div class="stats-row"><div class="stat-card"><div class="stat-num" style="color:var(--cyan);" id="sTotal">0</div><div class="stat-lbl">Questions</div></div><div class="stat-card"><div class="stat-num" style="color:#F59E0B;" id="sPend">0</div><div class="stat-lbl">En attente</div></div><div class="stat-card"><div class="stat-num" style="color:var(--mag);" id="sVerifs">0</div><div class="stat-lbl">Non vérifiés</div></div><div class="stat-card"><div class="stat-num" style="color:#10B981;" id="sUsers">0</div><div class="stat-lbl">Utilisateurs</div></div></div>
 <h3 style="font-family:'Outfit';font-weight:700;font-size:16px;margin-bottom:14px;">Questions récentes</h3>
 <div id="dashRecent"></div>
 </div>
 <!-- QUESTIONS -->
 <div class="panel" id="pan-questions"><div class="panel-hd"><h2>Questions</h2></div><div id="qList"></div></div>
 <!-- VERIFICATIONS -->
-<div class="panel" id="pan-verifs"><div class="panel-hd"><h2>Vérifications d'adhérents</h2><p>Validez ou refusez les demandes de vérification.</p></div><div id="vList"></div></div>
+<div class="panel" id="pan-verifs"><div class="panel-hd"><h2>Gestion des adhérents</h2><p>Vérifiez et validez le statut adhérent des utilisateurs inscrits.</p></div><div id="vList"></div></div>
 <!-- MESSAGES -->
 <div class="panel" id="pan-messages"><div class="panel-hd"><h2>Messages</h2></div><div class="conv-list" id="convList"></div><div class="msg-area" id="msgArea"><div class="msg-a-header" id="msgHeader"></div><div class="msg-a-list" id="msgAList"></div><div class="msg-a-input"><input id="msgAIn" placeholder="Répondre..." onkeydown="if(event.key==='Enter')adminSendMsg()"/><button onclick="adminSendMsg()">➤</button></div></div></div>
 <!-- ACTUS -->
@@ -139,14 +139,14 @@ function esc(s){if(!s)return'';const d=document.createElement('div');d.textConte
 async function loadDash(){
   const {count:total}=await sb.from('unsa_questions').select('*',{count:'exact',head:true});
   const {count:pend}=await sb.from('unsa_questions').select('*',{count:'exact',head:true}).eq('status','pending');
-  const {count:verifs}=await sb.from('unsa_membership_verifications').select('*',{count:'exact',head:true}).eq('status','pending');
+  const {count:nonVerified}=await sb.from('unsa_profiles').select('*',{count:'exact',head:true}).eq('adherent_verified',false).eq('role','user');
   const {count:users}=await sb.from('unsa_profiles').select('*',{count:'exact',head:true});
   document.getElementById('sTotal').textContent=total||0;
   document.getElementById('sPend').textContent=pend||0;
-  document.getElementById('sVerifs').textContent=verifs||0;
+  document.getElementById('sVerifs').textContent=nonVerified||0;
   document.getElementById('sUsers').textContent=users||0;
   document.getElementById('qBadge').textContent=pend||0;
-  document.getElementById('vBadge').textContent=verifs||0;
+  document.getElementById('vBadge').textContent=nonVerified||0;
   const {data:recent}=await sb.from('unsa_questions').select('*,unsa_profiles(prenom,nom,email)').order('created_at',{ascending:false}).limit(5);
   document.getElementById('dashRecent').innerHTML=(recent||[]).map(q=>renderQCard(q)).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune question.</div>';
 }
@@ -172,18 +172,20 @@ async function respondQ(qId){
 }
 
 async function loadVerifs(){
-  const {data}=await sb.from('unsa_membership_verifications').select('*,unsa_profiles(prenom,nom,email)').order('created_at',{ascending:false});
-  document.getElementById('vList').innerHTML=(data||[]).map(v=>{
-    const p=v.unsa_profiles||{};const cls=v.status==='pending'?'b-pending':v.status==='approved'?'b-approved':'b-rejected';
-    return `<div class="card"><div class="card-hd"><div><div class="card-title">${esc((p.prenom||'')+' '+(p.nom||''))}</div><div class="card-meta">${esc(p.email||'')} · N° ${esc(v.numero_adherent)}</div></div><span class="badge-s ${cls}">${v.status}</span></div>${v.status==='pending'?`<div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-cyan btn-xs" style="width:auto;background:#10B981;" onclick="verifAction('${v.id}','${v.user_id}','approved')">✅ Approuver</button><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="verifAction('${v.id}','${v.user_id}','rejected')">❌ Refuser</button></div>`:''}</div>`;
-  }).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune demande.</div>';
+  const {data}=await sb.from('unsa_profiles').select('*').order('created_at',{ascending:false});
+  const users=data||[];
+  const nonVerified=users.filter(u=>!u.adherent_verified&&u.role==='user');
+  const verified=users.filter(u=>u.adherent_verified);
+  document.getElementById('vList').innerHTML=
+    (nonVerified.length>0?'<h4 style="font-family:Outfit;font-weight:700;font-size:15px;color:var(--mag);margin-bottom:12px;">⏳ En attente de vérification ('+nonVerified.length+')</h4>'+
+    nonVerified.map(u=>`<div class="card" style="border-left:3px solid var(--mag);"><div class="card-hd"><div><div class="card-title">${esc(u.prenom||'')} ${esc(u.nom||'')}</div><div class="card-meta">${esc(u.email)} · ${esc(u.metier||'—')} · Inscrit le ${new Date(u.created_at).toLocaleDateString('fr-FR')}</div></div><span class="badge-s b-pending">Non vérifié</span></div><div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-cyan btn-xs" style="width:auto;background:#10B981;" onclick="toggleAdherent('${u.id}',true)">✅ Valider comme adhérent</button></div></div>`).join(''):'<div style="color:var(--g400);padding:14px;text-align:center;font-size:13px;margin-bottom:18px;">Aucun utilisateur en attente.</div>')+
+    '<h4 style="font-family:Outfit;font-weight:700;font-size:15px;color:#10B981;margin:24px 0 12px;">✅ Adhérents vérifiés ('+verified.length+')</h4>'+
+    (verified.length>0?verified.map(u=>`<div class="card" style="border-left:3px solid #10B981;"><div class="card-hd"><div><div class="card-title">${esc(u.prenom||'')} ${esc(u.nom||'')}</div><div class="card-meta">${esc(u.email)} · ${esc(u.metier||'—')}${u.numero_adherent?' · N° '+esc(u.numero_adherent):''}</div></div><span class="badge-s b-approved">Adhérent</span></div><div style="margin-top:8px;"><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="toggleAdherent('${u.id}',false)">Retirer le statut adhérent</button></div></div>`).join(''):'<div style="color:var(--g400);padding:14px;text-align:center;font-size:13px;">Aucun adhérent vérifié.</div>');
 }
 
-async function verifAction(vId,userId,status){
-  await sb.from('unsa_membership_verifications').update({status,reviewed_by:adminUser.id,reviewed_at:new Date().toISOString()}).eq('id',vId);
-  if(status==='approved'){
-    await sb.from('unsa_profiles').update({is_adherent:true,adherent_verified:true}).eq('id',userId);
-  }
+async function toggleAdherent(userId,approve){
+  if(!approve&&!confirm('Retirer le statut adhérent ?'))return;
+  await sb.from('unsa_profiles').update({is_adherent:approve,adherent_verified:approve}).eq('id',userId);
   loadVerifs();loadDash();
 }
 
