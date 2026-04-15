@@ -78,8 +78,8 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 .actu-card p{font-size:13px;color:var(--g500);line-height:1.6;}
 .actu-tag{display:inline-block;margin-top:12px;background:var(--g100);color:var(--g600);font-family:'Outfit';font-weight:600;font-size:11px;padding:4px 11px;border-radius:100px;}
 /* FAB */
-.fab{position:fixed;bottom:28px;right:28px;z-index:90;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,var(--mag),var(--cyan));color:var(--white);border:none;font-size:22px;cursor:pointer;box-shadow:0 6px 24px rgba(238,10,159,.3);transition:var(--tr);display:flex;align-items:center;justify-content:center;}
-.fab:hover{transform:scale(1.08) translateY(-2px);}
+.fab{position:fixed;bottom:28px;right:28px;z-index:90;height:52px;padding:0 24px;border-radius:100px;background:linear-gradient(135deg,var(--mag),var(--cyan));color:var(--white);border:none;font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 6px 24px rgba(238,10,159,.3);transition:var(--tr);display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;}
+.fab:hover{transform:scale(1.04) translateY(-2px);box-shadow:0 10px 32px rgba(238,10,159,.4);}
 /* OVERLAY / MODAL */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(12px);z-index:200;align-items:center;justify-content:center;padding:20px;}
 .overlay.open{display:flex;animation:fadeIn .2s ease;}
@@ -201,7 +201,7 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 .no-data{text-align:center;padding:20px;color:var(--g400);font-size:13px;}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--g200);border-top-color:var(--cyan);border-radius:50%;animation:spin .6s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:768px){.header-inner{padding:0 18px;height:60px;}.nav-links{display:none;}.menu-btn{display:block;}.hero{padding:55px 18px 45px;}.hero h1{font-size:30px;}.section-wrap{padding:0 18px 50px;}.about-hero{padding:30px 20px;}.adh-form-wrap{padding:24px 18px;}.theme-grid{grid-template-columns:1fr;}.fab{bottom:18px;right:18px;width:50px;height:50px;font-size:18px;}}
+@media(max-width:768px){.header-inner{padding:0 18px;height:60px;}.nav-links{display:none;}.menu-btn{display:block;}.hero{padding:55px 18px 45px;}.hero h1{font-size:30px;}.section-wrap{padding:0 18px 50px;}.about-hero{padding:30px 20px;}.adh-form-wrap{padding:24px 18px;}.theme-grid{grid-template-columns:1fr;}.fab{bottom:18px;right:18px;height:46px;padding:0 18px;font-size:12px;}}
 /* NAV MOBILE */
 .nav-mobile{display:none;position:fixed;top:60px;left:0;right:0;bottom:0;background:rgba(255,255,255,.97);backdrop-filter:blur(20px);z-index:99;padding:18px;flex-direction:column;gap:4px;}
 .nav-mobile.open{display:flex;animation:fadeIn .2s ease;}
@@ -247,7 +247,7 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 <div class="nav-mobile" id="mobileNav"></div>
 
 <!-- FAB -->
-<button class="fab" onclick="openQuestion()">✉</button>
+<button class="fab" onclick="openQuestion()">✉ Poser une question</button>
 
 <!-- Q MODAL -->
 <div class="overlay" id="qOverlay" onclick="if(event.target===this)closeQ()"><div class="modal">
@@ -259,6 +259,12 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 <div class="step" id="qStepLimit"><div style="text-align:center;padding:16px 0;"><h4 style="font-family:'Outfit';font-weight:800;font-size:18px;color:var(--g900);margin-bottom:6px;">Question gratuite utilisée</h4><p style="font-size:13px;color:var(--g400);margin-bottom:14px;">Adhérez pour poser d'autres questions ou prenez RDV gratuitement.</p><button class="btn btn-mag" onclick="closeQ();goTo('adh')">Adhérer</button><button class="btn btn-outline" style="margin-top:7px;" onclick="closeQ();goTo('rdv')">Prendre RDV</button></div></div>
 </div></div></div>
 
+<!-- ACTU DETAIL MODAL -->
+<div class="overlay" id="actuOverlay" onclick="if(event.target===this)this.classList.remove('open')"><div class="modal" style="max-width:600px;">
+<div class="modal-head"><div><div class="actu-date" id="actuDetDate"></div><h3 id="actuDetTitle" style="margin-top:6px;"></h3></div><button class="close-btn" onclick="document.getElementById('actuOverlay').classList.remove('open')">✕</button></div>
+<div class="modal-body"><div id="actuDetImg" style="margin-bottom:16px;"></div><p id="actuDetContent" style="font-size:14px;color:var(--g600);line-height:1.7;"></p><div id="actuDetTag" style="margin-top:14px;"></div></div>
+</div></div>
+
 <main>
 <!-- ACCUEIL -->
 <div class="page active" id="p-accueil">
@@ -266,14 +272,14 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 <div class="section-wrap"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:56px;"><div style="text-align:center;padding:24px 14px;background:var(--g50);border-radius:var(--r-lg);"><div style="font-family:'Outfit';font-weight:900;font-size:28px;color:var(--cyan);">18</div><div style="font-size:12px;color:var(--g400);margin-top:3px;">Spécialités</div></div><div style="text-align:center;padding:24px 14px;background:var(--g50);border-radius:var(--r-lg);"><div style="font-family:'Outfit';font-weight:900;font-size:28px;color:var(--mag);">5€</div><div style="font-size:12px;color:var(--g400);margin-top:3px;">Par mois</div></div><div style="text-align:center;padding:24px 14px;background:var(--g50);border-radius:var(--r-lg);"><div style="font-family:'Outfit';font-weight:900;font-size:28px;color:var(--cyan);">66%</div><div style="font-size:12px;color:var(--g400);margin-top:3px;">Déductible</div></div><div style="text-align:center;padding:24px 14px;background:var(--g50);border-radius:var(--r-lg);"><div style="font-family:'Outfit';font-weight:900;font-size:28px;color:var(--mag);">100%</div><div style="font-size:12px;color:var(--g400);margin-top:3px;">Confidentiel</div></div></div>
 <div class="section-header"><h2>Dernières actus</h2></div><div class="actu-grid" id="homeActus"></div><div style="text-align:center;margin-top:28px;"><button class="btn btn-outline" style="width:auto;" onclick="goTo('actus')">Toutes les actus →</button></div></div></div>
 <!-- ACTUS --><div class="page" id="p-actus"><div class="section-wrap" style="padding-top:44px;"><div class="section-header"><h2>Actualités</h2></div><div class="actu-grid" id="allActus"></div></div></div>
-<!-- ABOUT --><div class="page" id="p-about"><div class="section-wrap" style="padding-top:44px;"><div class="about-hero"><h2>L'UNSA Énergie,<br/>un syndicat à vos côtés</h2><p>Syndicat indépendant, libre de toute attache politique. Nous défendons vos droits, vos conditions de travail et votre pouvoir d'achat.</p></div><div class="section-header"><h2>Nos valeurs</h2></div><div class="values-grid"><div class="value-card"><div class="value-icon" style="background:var(--cyan-light);">⚖️</div><h4>Indépendance</h4><p>Aucune attache politique.</p></div><div class="value-card"><div class="value-icon" style="background:var(--mag-light);">🤝</div><h4>Proximité</h4><p>Des représentants disponibles.</p></div><div class="value-card"><div class="value-icon" style="background:var(--cyan-light);">🎯</div><h4>Pragmatisme</h4><p>Des résultats concrets.</p></div><div class="value-card"><div class="value-icon" style="background:var(--mag-light);">🛡️</div><h4>Protection</h4><p>Accompagnement juridique.</p></div><div class="value-card"><div class="value-icon" style="background:var(--cyan-light);">📊</div><h4>Transparence</h4><p>Actions et résultats partagés.</p></div><div class="value-card"><div class="value-icon" style="background:var(--mag-light);">🌐</div><h4>Solidarité</h4><p>Un réseau national pour tous.</p></div></div><div class="discretion-box"><div style="font-size:24px;">🔒</div><div><h4>Adhésion confidentielle</h4><p><strong>Aucune obligation de le déclarer à votre employeur.</strong> Votre hiérarchie n'est pas informée.</p></div></div></div></div>
+<!-- ABOUT --><div class="page" id="p-about"><div class="section-wrap" style="padding-top:44px;"><div class="about-hero"><h2>Qu'est-ce que l'UNSA ?</h2><p>L'UNSA, Union Nationale des Syndicats Autonomes, a été créée en 1993 autour de 5 organisations constitutives partageant les mêmes valeurs républicaines de laïcité, de démocratie, de solidarité, de liberté, d'humanisme, de justice sociale et de réformisme.</p></div><div class="section-header"><h2>Nos principes fondateurs</h2></div><div class="values-grid"><div class="value-card"><div class="value-icon" style="background:var(--cyan-light);">⚖️</div><h4>Autonomie & Indépendance</h4><p>L'UNSA affirme sa totale indépendance à l'égard des pouvoirs politiques, économiques, des partis politiques et des religions.</p></div><div class="value-card"><div class="value-icon" style="background:var(--mag-light);">🗣️</div><h4>Dialogue & Négociation</h4><p>Ni adepte du refus systématique, ni soupçonnable de complaisance. L'UNSA privilégie toujours le dialogue pour faire aboutir les revendications.</p></div><div class="value-card"><div class="value-icon" style="background:var(--cyan-light);">🏛️</div><h4>Démocratie</h4><p>C'est la base qui décide des grandes orientations. Chaque adhérent participe aux débats et fixe les orientations par ses votes.</p></div><div class="value-card"><div class="value-icon" style="background:var(--mag-light);">🤝</div><h4>Progrès social</h4><p>L'UNSA s'est fixé comme objectif de promouvoir un progrès social durable et de lutter contre toutes les formes d'exclusion.</p></div><div class="value-card"><div class="value-icon" style="background:var(--cyan-light);">🇪🇺</div><h4>Dimension européenne</h4><p>Membre de la Confédération Européenne des Syndicats (CES), l'UNSA participe activement à la construction d'une Europe sociale.</p></div><div class="value-card"><div class="value-icon" style="background:var(--mag-light);">💪</div><h4>370 000 adhérents</h4><p>L'UNSA constitue l'une des premières forces syndicales représentées, avec une représentativité reconnue au niveau national et européen.</p></div></div><div class="discretion-box"><div style="font-size:24px;">🔒</div><div><h4>Adhésion confidentielle</h4><p>Chaque organisation syndicale exerce sa responsabilité dans la plus grande autonomie. <strong>Vous n'avez aucune obligation de déclarer votre adhésion à votre employeur.</strong> Votre hiérarchie n'est pas informée.</p></div></div></div></div>
 <!-- ADHERER --><div class="page" id="p-adh"><div class="section-wrap" style="padding-top:44px;"><div class="section-header" style="text-align:center;"><h2>Rejoignez l'UNSA Énergie</h2></div><div class="tax-notice">💡 <strong>66% déductible des impôts.</strong> 60€/an = 20,40€ net.</div><div class="pricing-grid"><div class="price-card"><div class="price-label">Mensuel</div><div class="price-amount">5<span>€</span></div><div class="price-period">par mois</div><button class="btn btn-cyan btn-sm" onclick="document.getElementById('adhForm').scrollIntoView({behavior:'smooth'})">Choisir</button></div><div class="price-card popular"><div class="price-label">Trimestriel</div><div class="price-amount">15<span>€</span></div><div class="price-period">par trimestre</div><button class="btn btn-mag btn-sm" onclick="document.getElementById('adhForm').scrollIntoView({behavior:'smooth'})">Choisir</button></div><div class="price-card"><div class="price-label">Annuel</div><div class="price-amount">60<span>€</span></div><div class="price-period">par an</div><button class="btn btn-cyan btn-sm" onclick="document.getElementById('adhForm').scrollIntoView({behavior:'smooth'})">Choisir</button></div></div><div class="adh-form-wrap" id="adhForm"><h3>Demande d'adhésion</h3><div class="sub">Un représentant vous contactera en toute discrétion.</div><div class="form-row"><div class="fg"><label>Prénom</label><input class="input" id="adhPrenom"/></div><div class="fg"><label>Nom</label><input class="input" id="adhNom"/></div></div><div class="form-row"><div class="fg"><label>Email</label><input class="input" id="adhEmail" type="email"/></div><div class="fg"><label>Téléphone</label><input class="input" id="adhTel"/></div></div><div class="form-row"><div class="fg"><label>Formule</label><select class="input" id="adhFormule"><option>Mensuel — 5€/mois</option><option selected>Trimestriel — 15€/trimestre</option><option>Annuel — 60€/an</option></select></div><div class="fg"><label>Statut</label><select class="input" id="adhStatut"><option>Agent d'exécution</option><option>Agent de maîtrise</option><option>Cadre</option><option>Autre</option></select></div></div><button class="btn btn-cyan" onclick="submitAdh()">Envoyer ma demande</button><div class="success-msg" id="adhSuccess"><div class="success-check">✓</div><h4>Demande envoyée</h4><p>Un représentant vous contactera.</p></div></div></div></div>
 <!-- RDV --><div class="page" id="p-rdv"><div class="section-wrap" style="padding-top:44px;"><div class="section-header" style="text-align:center;"><h2>Prendre rendez-vous</h2><p style="margin:0 auto;">Gratuit et confidentiel. Minimum 7 jours de préavis.</p></div><div style="max-width:680px;margin:0 auto;"><div class="calendar-wrap"><div class="cal-header"><h4 id="calMonth"></h4><div class="cal-nav"><button onclick="prevM()">‹</button><button onclick="nextM()">›</button></div></div><div class="cal-days"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div><div class="cal-grid" id="calGrid"></div></div><div class="time-slots" id="timeSlots"><div class="time-slot" onclick="pickTime(this)">9h</div><div class="time-slot" onclick="pickTime(this)">10h</div><div class="time-slot" onclick="pickTime(this)">11h</div><div class="time-slot" onclick="pickTime(this)">14h</div><div class="time-slot" onclick="pickTime(this)">15h</div><div class="time-slot" onclick="pickTime(this)">16h</div><div class="time-slot" onclick="pickTime(this)">17h</div></div><div class="rdv-form" id="rdvForm"><div class="rdv-summary"><div class="s-icon">📅</div><div class="s-detail"><strong id="rdvDateLbl"></strong><span id="rdvTimeLbl"></span></div></div><div class="form-row"><div class="fg"><label>Prénom</label><input class="input" id="rdvP"/></div><div class="fg"><label>Nom</label><input class="input" id="rdvN"/></div></div><div class="form-row"><div class="fg"><label>Email</label><input class="input" id="rdvE" type="email"/></div><div class="fg"><label>Téléphone</label><input class="input" id="rdvT"/></div></div><div class="fg"><label>Motif</label><input class="input" id="rdvM"/></div><button class="btn btn-cyan" onclick="submitRdv()">Confirmer</button><div class="success-msg" id="rdvOk"><div class="success-check">✓</div><h4>RDV demandé</h4><p>Confirmation par email.</p></div></div></div></div></div>
 <!-- IEG --><div class="page" id="p-ieg"><div class="section-wrap" style="padding-top:44px;"><div class="ieg-hero"><h2>Avantages IEG</h2><p>Offres négociées pour les salariés et retraités des IEG.</p><a href="https://avantagesieg.com/" target="_blank" class="ieg-link">Découvrir →</a></div><div class="section-header"><h2>En un coup d'œil</h2></div><div class="ieg-grid"><div class="ieg-card"><div class="ic-icon">✈️</div><h4>Voyages & Séjours</h4><p>Offres négociées sur séjours, circuits et croisières.</p></div><div class="ieg-card"><div class="ic-icon">🎭</div><h4>Spectacles & Cinéma</h4><p>Tarifs préférentiels pour vos sorties.</p></div><div class="ieg-card"><div class="ic-icon">🛒</div><h4>Shopping</h4><p>Réductions et offres partenaires.</p></div><div class="ieg-card"><div class="ic-icon">🏋️</div><h4>Sport & Bien-être</h4><p>Réductions sur vos abonnements.</p></div><div class="ieg-card"><div class="ic-icon">🍽️</div><h4>Restauration</h4><p>Avantages sur la restauration.</p></div><div class="ieg-card"><div class="ic-icon">🚗</div><h4>Mobilité</h4><p>Offres location et assurance.</p></div></div></div></div>
 <!-- MESSAGES --><div class="page" id="p-messages"><div class="section-wrap" style="padding-top:44px;"><div id="msgContent"></div></div></div>
 <!-- PROFIL --><div class="page" id="p-profil"><div class="section-wrap" style="padding-top:44px;"><div class="section-header" style="text-align:center;"><h2>Mon profil</h2></div><div class="profile-wrap"><div style="text-align:center;margin-bottom:28px;"><div class="profile-avatar" id="profAvatar" onclick="document.getElementById('photoIn').click()">👤</div><input type="file" id="photoIn" accept="image/*" style="display:none;" onchange="uploadPhoto(event)"/><div style="font-size:12px;color:var(--cyan);font-weight:600;cursor:pointer;font-family:'Outfit';" onclick="document.getElementById('photoIn').click()">Changer la photo</div></div><div class="profile-section"><h4>Informations</h4><div class="form-row"><div class="fg"><label>Prénom</label><input class="input" id="profPrenom" oninput="saveProf()"/></div><div class="fg"><label>Nom</label><input class="input" id="profNom" oninput="saveProf()"/></div></div><div class="form-row"><div class="fg"><label>Email</label><input class="input" id="profEmail" disabled/></div><div class="fg"><label>Téléphone</label><input class="input" id="profTel" oninput="saveProf()"/></div></div><div class="form-row"><div class="fg"><label>Métier</label><input class="input" id="profMetier" oninput="saveProf()"/></div><div class="fg"><label>Agence</label><input class="input" id="profAgence" value="Île et Armor" oninput="saveProf()"/></div></div></div><div class="profile-section"><h4>Mes questions</h4><div id="profQuestions"></div></div><div style="text-align:center;margin-top:18px;"><button class="btn btn-outline btn-sm" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="doLogout()">Déconnexion</button></div></div></div></div>
 </main>
-<div class="footer"><div class="footer-inner"><div class="footer-brand">UNSA <em>Énergie</em></div><div class="footer-info">Île et Armor</div><div class="footer-links"><a onclick="goTo('about')">Qui sommes-nous</a><a href="admin.html">Admin</a><a href="mailto:aurelien.herbin@grdf.fr">Contact</a></div></div></div>
+<div class="footer"><div class="footer-inner"><div class="footer-brand">UNSA <em>Énergie</em></div><div class="footer-info">Île et Armor</div><div class="footer-links"><a onclick="goTo('about')">Qui sommes-nous</a><a href="admin.html">Admin</a></div></div></div>
 
 <script>
 const SUPA_URL="https://aiafvjhiprdldtwmktur.supabase.co";
@@ -334,10 +340,19 @@ async function doRegister(){
   const tel=document.getElementById('aRegTel').value.trim();
   const metier=document.getElementById('aRegMetier').value.trim();
   if(!prenom||!nom||!email||!pwd){document.getElementById('regErr').textContent='Tous les champs marqués sont obligatoires.';document.getElementById('regErr').style.display='block';return;}
-  const {data,error}=await sb.auth.signUp({email,password:pwd,options:{data:{prenom,nom}}});
+  const {data,error}=await sb.auth.signUp({email,password:pwd,options:{data:{prenom,nom},emailRedirectTo:window.location.origin+window.location.pathname}});
   if(error){document.getElementById('regErr').textContent=error.message;document.getElementById('regErr').style.display='block';return;}
+  // If email confirmation is required, show message
+  if(data.user&&!data.session){
+    document.getElementById('authRegister').innerHTML='<div style="text-align:center;padding:20px 0;"><div style="font-size:48px;margin-bottom:14px;">📧</div><h3 style="font-family:Outfit;font-weight:800;font-size:20px;color:var(--g900);margin-bottom:8px;">Vérifiez votre email</h3><p style="font-size:14px;color:var(--g400);line-height:1.6;">Un email de confirmation a été envoyé à <strong>'+esc(email)+'</strong>. Cliquez sur le lien pour activer votre compte.</p><button class="btn btn-outline" style="margin-top:16px;" onclick="authTab(\'login\')">Retour à la connexion</button></div>';
+    // Pre-create profile (will be accessible after confirmation)
+    const uid=data.user.id;
+    await sb.from('unsa_profiles').upsert({id:uid,prenom,nom,email,telephone:tel,metier});
+    return;
+  }
+  // If auto-confirmed (e.g. email confirm disabled)
   user=data.user;
-  await sb.from('unsa_profiles').insert({id:user.id,prenom,nom,email,telephone:tel,metier});
+  await sb.from('unsa_profiles').upsert({id:user.id,prenom,nom,email,telephone:tel,metier});
   await loadProfile();document.getElementById('authOverlay').classList.add('hidden');buildNav();
 }
 async function doLogout(){await sb.auth.signOut();user=null;profile=null;location.reload();}
@@ -361,6 +376,7 @@ async function loadProfile(){
     if(profile.telephone)document.getElementById('profTel').value=profile.telephone;
     if(profile.metier)document.getElementById('profMetier').value=profile.metier;
     if(profile.agence)document.getElementById('profAgence').value=profile.agence;
+    if(profile.photo_url){document.getElementById('profAvatar').innerHTML='<img src="'+profile.photo_url+'" alt=""/>';}
   }
   loadProfileQuestions();
 }
@@ -375,7 +391,18 @@ async function saveProf(){
     updated_at:new Date().toISOString()
   }).eq('id',user.id);
 }
-function uploadPhoto(){/* TODO: Supabase storage */}
+async function uploadPhoto(ev){
+  const file=ev.target.files[0];if(!file||!user)return;
+  const ext=file.name.split('.').pop();
+  const path=user.id+'/avatar.'+ext;
+  const {error}=await sb.storage.from('avatars').upload(path,file,{upsert:true});
+  if(error){alert('Erreur upload: '+error.message);return;}
+  const {data:{publicUrl}}=sb.storage.from('avatars').getPublicUrl(path);
+  const url=publicUrl+'?t='+Date.now();
+  await sb.from('unsa_profiles').update({photo_url:url}).eq('id',user.id);
+  document.getElementById('profAvatar').innerHTML='<img src="'+url+'" alt=""/>';
+  profile.photo_url=url;
+}
 
 // ═══ NAV ═══
 function buildNav(){
@@ -403,13 +430,24 @@ function toggleMobile(){const n=document.getElementById('mobileNav'),b=document.
 function closeMobile(){document.getElementById('mobileNav').classList.remove('open');document.getElementById('menuBtn').textContent='☰';}
 
 // ═══ ACTUS ═══
+let allActus=[];
 async function loadActus(){
   const {data}=await sb.from('unsa_actus').select('*').order('created_at',{ascending:false});
-  const list=data||[];
+  allActus=data||[];
   const fmt=d=>new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}).toUpperCase();
-  const card=i=>`<div class="actu-card"><div class="actu-date">${fmt(i.created_at)}</div><h4>${esc(i.title)}</h4><p>${esc(i.content)}</p><div class="actu-tag">${esc(i.tag||'Actualité')}</div></div>`;
-  const h=document.getElementById('homeActus');if(h)h.innerHTML=list.slice(0,4).map(card).join('')||'<div class="no-data">Aucune actualité.</div>';
-  const a=document.getElementById('allActus');if(a)a.innerHTML=list.map(card).join('')||'<div class="no-data">Aucune actualité.</div>';
+  const card=(i,idx)=>`<div class="actu-card" onclick="showActuDetail(${idx})" style="cursor:pointer;"><div class="actu-date">${fmt(i.created_at)}</div><h4>${esc(i.title)}</h4><p>${esc(i.content).substring(0,120)}${i.content.length>120?'...':''}</p><div class="actu-tag">${esc(i.tag||'Actualité')}</div>${i.image_url?'<div style="font-size:10px;color:var(--cyan);margin-top:6px;">📷 Image disponible</div>':''}</div>`;
+  const h=document.getElementById('homeActus');if(h)h.innerHTML=allActus.slice(0,4).map((a,i)=>card(a,i)).join('')||'<div class="no-data">Aucune actualité.</div>';
+  const a=document.getElementById('allActus');if(a)a.innerHTML=allActus.map((a,i)=>card(a,i)).join('')||'<div class="no-data">Aucune actualité.</div>';
+}
+function showActuDetail(idx){
+  const a=allActus[idx];if(!a)return;
+  const fmt=d=>new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+  document.getElementById('actuDetDate').textContent=fmt(a.created_at);
+  document.getElementById('actuDetTitle').textContent=a.title;
+  document.getElementById('actuDetContent').textContent=a.content;
+  document.getElementById('actuDetTag').innerHTML=a.tag?'<div class="actu-tag">'+esc(a.tag)+'</div>':'';
+  document.getElementById('actuDetImg').innerHTML=a.image_url?'<img src="'+esc(a.image_url)+'" style="width:100%;border-radius:var(--r-md);"/>':'';
+  document.getElementById('actuOverlay').classList.add('open');
 }
 
 // ═══ QUESTIONS ═══
