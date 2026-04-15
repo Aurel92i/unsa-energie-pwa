@@ -161,13 +161,24 @@ function renderQCard(q,full){
   const name=(p.prenom||'')+' '+(p.nom||'');
   const cls=q.status==='answered'?'b-answered':'b-pending';
   const txt=q.status==='answered'?'Répondue':'En attente';
-  return `<div class="card"><div class="card-hd"><div><div class="card-title">${esc(q.theme)} — ${esc(name)}</div><div class="card-meta">${esc(p.email||'')} · ${esc(p.metier||'')} · Spécialiste: ${esc(q.representant)}</div></div><span class="badge-s ${cls}">${txt}</span></div><div class="card-body">${esc(q.question_text)}</div>${full?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--g100);">${q.response?`<div style="background:var(--g50);padding:12px;border-radius:var(--r-sm);font-size:13px;margin-bottom:8px;">💬 ${esc(q.response)}</div>`:``}<textarea class="input" id="resp-${q.id}" placeholder="Votre réponse..." style="min-height:60px;">${q.response||''}</textarea><button class="btn btn-cyan btn-sm" style="width:auto;margin-top:6px;" onclick="respondQ('${q.id}')">${q.response?'Modifier':'Répondre'}</button></div>`:''}</div>`;
+  const attachHTML=q.response_attachment_url?`<div style="margin-top:6px;"><a href="${esc(q.response_attachment_url)}" target="_blank" style="font-size:12px;color:var(--cyan);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">📎 ${esc(q.response_attachment_name||'Pièce jointe')}</a></div>`:'';
+  return `<div class="card"><div class="card-hd"><div><div class="card-title">${esc(q.theme)} — ${esc(name)}</div><div class="card-meta">${esc(p.email||'')} · ${esc(p.metier||'')}</div></div><span class="badge-s ${cls}">${txt}</span></div><div class="card-body">${esc(q.question_text)}</div>${full?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--g100);">${q.response?`<div style="background:var(--g50);padding:12px;border-radius:var(--r-sm);font-size:13px;margin-bottom:8px;">💬 ${esc(q.response)}${attachHTML}</div>`:``}<textarea class="input" id="resp-${q.id}" placeholder="Votre réponse..." style="min-height:60px;">${q.response||''}</textarea><div style="margin-top:6px;"><label style="font-family:'Outfit';font-weight:600;font-size:11px;color:var(--g500);text-transform:uppercase;">📎 Pièce jointe (optionnel)</label><input type="file" id="attach-${q.id}" class="input" style="padding:8px;margin-top:4px;"/></div><button class="btn btn-cyan btn-sm" style="width:auto;margin-top:8px;" onclick="respondQ('${q.id}')">${q.response?'Modifier':'Répondre'}</button></div>`:''}</div>`;
 }
 
 async function respondQ(qId){
   const txt=document.getElementById('resp-'+qId).value.trim();
   if(!txt)return;
-  await sb.from('unsa_questions').update({response:txt,status:'answered',responded_by:adminUser.id,responded_at:new Date().toISOString()}).eq('id',qId);
+  let attachment_url=null,attachment_name=null;
+  const fileInput=document.getElementById('attach-'+qId);
+  if(fileInput&&fileInput.files&&fileInput.files[0]){
+    const file=fileInput.files[0];
+    const path='q_'+qId+'_'+Date.now()+'_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'');
+    const {error:upErr}=await sb.storage.from('question-attachments').upload(path,file);
+    if(!upErr){const {data:{publicUrl}}=sb.storage.from('question-attachments').getPublicUrl(path);attachment_url=publicUrl;attachment_name=file.name;}
+  }
+  const update={response:txt,status:'answered',responded_by:adminUser.id,responded_at:new Date().toISOString()};
+  if(attachment_url){update.response_attachment_url=attachment_url;update.response_attachment_name=attachment_name;}
+  await sb.from('unsa_questions').update(update).eq('id',qId);
   loadQs();loadDash();
 }
 
