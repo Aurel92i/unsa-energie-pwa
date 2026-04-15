@@ -201,6 +201,17 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 .no-data{text-align:center;padding:20px;color:var(--g400);font-size:13px;}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--g200);border-top-color:var(--cyan);border-radius:50%;animation:spin .6s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
+.nav-locked{opacity:.4;pointer-events:none;position:relative;}
+.nav-locked::after{content:'🔒';font-size:10px;margin-left:3px;}
+.fab-locked{opacity:.5;background:var(--g300)!important;box-shadow:none!important;}
+.fab-locked:hover{transform:none!important;box-shadow:none!important;}
+.page-locked{position:relative;}.page-locked::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.6);z-index:10;border-radius:var(--r-xl);}
+.lock-banner{background:var(--mag-light);border:1px solid rgba(238,10,159,.15);border-radius:var(--r-md);padding:18px 22px;margin-bottom:24px;display:flex;align-items:center;gap:14px;z-index:11;position:relative;}
+.lock-banner .lb-icon{font-size:28px;flex-shrink:0;}
+.lock-banner h4{font-family:'Outfit';font-weight:700;font-size:15px;color:var(--mag-dark);margin-bottom:2px;}
+.lock-banner p{font-size:13px;color:var(--g600);line-height:1.5;}
+.lock-banner .lb-btn{margin-top:8px;display:inline-block;background:var(--mag);color:var(--white);font-family:'Outfit';font-weight:700;font-size:12px;padding:7px 16px;border-radius:var(--r-sm);cursor:pointer;border:none;transition:var(--tr);}
+.lock-banner .lb-btn:hover{background:var(--mag-dark);}
 @media(max-width:768px){.header-inner{padding:0 18px;height:60px;}.nav-links{display:none;}.menu-btn{display:block;}.hero{padding:55px 18px 45px;}.hero h1{font-size:30px;}.section-wrap{padding:0 18px 50px;}.about-hero{padding:30px 20px;}.adh-form-wrap{padding:24px 18px;}.theme-grid{grid-template-columns:1fr;}.fab{bottom:18px;right:18px;height:46px;padding:0 18px;font-size:12px;}}
 /* NAV MOBILE */
 .nav-mobile{display:none;position:fixed;top:60px;left:0;right:0;bottom:0;background:rgba(255,255,255,.97);backdrop-filter:blur(20px);z-index:99;padding:18px;flex-direction:column;gap:4px;}
@@ -256,7 +267,7 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 <div class="step active" id="qStep1"><div class="theme-grid" id="themeGrid"></div></div>
 <div class="step" id="qStep2"><div class="sel-badge" id="selBadge"></div><form onsubmit="sendQ(); return false;"><textarea class="input" id="qText" style="min-height:110px;resize:vertical;" placeholder="Décrivez votre question..."></textarea><button type="submit" class="btn btn-cyan" style="margin-top:12px;">Envoyer</button></form><button class="btn btn-outline" style="margin-top:7px;" onclick="showStep('qStep1');document.getElementById('qTitle').textContent='Choisissez un thème'">← Retour</button></div>
 <div class="step" id="qStep3"><div class="success-msg show"><div class="success-check">✓</div><h4>Question envoyée</h4><p>Vous recevrez une réponse dans les meilleurs délais.</p><button class="btn btn-outline" style="margin-top:14px;" onclick="closeQ()">Fermer</button></div></div>
-<div class="step" id="qStepLimit"><div style="text-align:center;padding:16px 0;"><h4 style="font-family:'Outfit';font-weight:800;font-size:18px;color:var(--g900);margin-bottom:6px;">Question gratuite utilisée</h4><p style="font-size:13px;color:var(--g400);margin-bottom:14px;">Adhérez pour poser d'autres questions ou prenez RDV gratuitement.</p><button class="btn btn-mag" onclick="closeQ();goTo('adh')">Adhérer</button><button class="btn btn-outline" style="margin-top:7px;" onclick="closeQ();goTo('rdv')">Prendre RDV</button></div></div>
+<div class="step" id="qStepLimit"><div style="text-align:center;padding:16px 0;"><div style="font-size:40px;margin-bottom:12px;">🔒</div><h4 style="font-family:'Outfit';font-weight:800;font-size:18px;color:var(--g900);margin-bottom:6px;">Question annuelle utilisée</h4><p style="font-size:13px;color:var(--g400);margin-bottom:14px;line-height:1.6;">Vous avez posé votre question gratuite cette année. Adhérez pour poser des questions illimitées ou prenez un RDV gratuit.</p><button class="btn btn-mag" onclick="closeQ();goTo('adh')">Adhérer pour débloquer</button><button class="btn btn-outline" style="margin-top:7px;" onclick="closeQ();goTo('rdv')">Prendre RDV</button></div></div>
 </div></div></div>
 
 <!-- ACTU DETAIL MODAL -->
@@ -288,6 +299,7 @@ const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 let user=null,profile=null,questionUsed=false;
 let calY,calM,selDate=null,selTime=null,selTheme=null;
 let msgChannel=null,currentConv=null;
+let qCountYear=0,rdvCountYear=0;
 
 const THEMES=[
 {id:'astreinte',label:'Astreinte',rep:'Eric Fermigier',icon:'🚒'},
@@ -379,6 +391,13 @@ async function loadProfile(){
     if(profile.photo_url){document.getElementById('profAvatar').innerHTML='<img src="'+profile.photo_url+'" alt=""/>';}
   }
   loadProfileQuestions();
+  // Load yearly usage counts
+  const yearStart=new Date(new Date().getFullYear(),0,1).toISOString();
+  const {count:qc}=await sb.from('unsa_questions').select('*',{count:'exact',head:true}).eq('user_id',user.id).gte('created_at',yearStart);
+  qCountYear=qc||0;
+  const {count:rc}=await sb.from('unsa_rdv_requests').select('*',{count:'exact',head:true}).eq('user_id',user.id).gte('created_at',yearStart);
+  rdvCountYear=rc||0;
+  buildNav();
 }
 async function saveProf(){
   if(!user)return;
@@ -405,16 +424,31 @@ async function uploadPhoto(ev){
 }
 
 // ═══ NAV ═══
+function isAdh(){return profile&&profile.adherent_verified;}
 function buildNav(){
-  const isAdh=profile&&profile.adherent_verified;
+  const adh=isAdh();
   const links=[
-    ['accueil','Accueil'],['actus','Actus'],['about','Qui sommes-nous'],['rdv','RDV'],['ieg','Avantages IEG'],
-    ...(isAdh?[['messages','💬 Messages']]:[]),
-    ['profil','Profil'],['adh','Adhérer','nav-cta']
+    ['accueil','Accueil'],
+    ['actus','Actus'],
+    ['about','Qui sommes-nous'],
+    ['rdv','RDV',(!adh&&rdvCountYear>=1)?'nav-locked':''],
+    ['ieg','Avantages IEG'],
+    ['messages','💬 Messages',!adh?'nav-locked':''],
+    ['profil','Profil'],
+    ...(!adh?[['adh','Adhérer','nav-cta']]:[])
   ];
-  const html=links.map(([id,label,cls])=>`<li><a class="${cls||''}" onclick="goTo('${id}',this)">${label}</a></li>`).join('');
+  const html=links.map(([id,label,cls])=>`<li><a class="${cls||''}" onclick="navClick('${id}',this)">${label}</a></li>`).join('');
   document.getElementById('navLinks').innerHTML=html;
-  document.getElementById('mobileNav').innerHTML=links.map(([id,label])=>`<a onclick="goTo('${id}',this);closeMobile()">${label}</a>`).join('');
+  document.getElementById('mobileNav').innerHTML=links.map(([id,label,cls])=>`<a class="${cls||''}" onclick="navClick('${id}',this);closeMobile()">${label}</a>`).join('');
+  // Update FAB
+  const fab=document.querySelector('.fab');
+  if(!adh&&qCountYear>=1){fab.classList.add('fab-locked');}else{fab.classList.remove('fab-locked');}
+}
+function navClick(id,el){
+  const adh=isAdh();
+  if(id==='messages'&&!adh){alert('🔒 La messagerie est réservée aux adhérents. Adhérez pour débloquer cette fonctionnalité.');return;}
+  if(id==='rdv'&&!adh&&rdvCountYear>=1){alert('🔒 Vous avez utilisé votre RDV gratuit annuel. Adhérez pour prendre des RDV illimités.');return;}
+  goTo(id,el);
 }
 function goTo(id,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -425,6 +459,21 @@ function goTo(id,el){
   if(id==='messages')loadMessages();
   if(id==='profil')loadProfileQuestions();
   if(id==='actus')loadActus();
+  // Dynamic lock banners for non-adherents
+  updateLockBanners();
+}
+function updateLockBanners(){
+  const adh=isAdh();
+  // RDV lock banner
+  let rdvBanner=document.getElementById('rdvLockBanner');
+  if(!adh&&rdvCountYear>=1){
+    if(!rdvBanner){
+      rdvBanner=document.createElement('div');rdvBanner.id='rdvLockBanner';rdvBanner.className='lock-banner';
+      rdvBanner.innerHTML='<div class="lb-icon">🔒</div><div><h4>RDV annuel utilisé</h4><p>Vous avez utilisé votre rendez-vous gratuit cette année. Adhérez pour des RDV illimités.</p><button class="lb-btn" onclick="goTo(\'adh\')">Adhérer</button></div>';
+      const rdvPage=document.querySelector('#p-rdv .section-wrap');
+      if(rdvPage)rdvPage.insertBefore(rdvBanner,rdvPage.children[1]);
+    }
+  }else if(rdvBanner){rdvBanner.remove();}
 }
 function toggleMobile(){const n=document.getElementById('mobileNav'),b=document.getElementById('menuBtn');n.classList.toggle('open');b.textContent=n.classList.contains('open')?'✕':'☰';}
 function closeMobile(){document.getElementById('mobileNav').classList.remove('open');document.getElementById('menuBtn').textContent='☰';}
@@ -452,7 +501,11 @@ function showActuDetail(idx){
 
 // ═══ QUESTIONS ═══
 function buildThemeGrid(){document.getElementById('themeGrid').innerHTML=THEMES.map(t=>`<div class="theme-item" onclick="selThemeFn('${t.id}')" id="th-${t.id}"><span class="t-label">${t.icon} ${t.label}</span></div>`).join('');}
-function openQuestion(){if(questionUsed)showStep('qStepLimit');else{showStep('qStep1');document.getElementById('qTitle').textContent='Choisissez un thème';}document.getElementById('qOverlay').classList.add('open');}
+function openQuestion(){
+  if(!isAdh()&&qCountYear>=1){showStep('qStepLimit');document.getElementById('qOverlay').classList.add('open');return;}
+  showStep('qStep1');document.getElementById('qTitle').textContent='Choisissez un thème';
+  document.getElementById('qOverlay').classList.add('open');
+}
 function closeQ(){document.getElementById('qOverlay').classList.remove('open');}
 function showStep(id){document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function selThemeFn(id){selTheme=THEMES.find(t=>t.id===id);document.querySelectorAll('.theme-item').forEach(t=>t.classList.remove('selected'));document.getElementById('th-'+id).classList.add('selected');setTimeout(()=>{document.getElementById('qTitle').textContent='Votre question';document.getElementById('selBadge').textContent=selTheme.icon+' '+selTheme.label;showStep('qStep2');},150);}
@@ -465,7 +518,7 @@ async function sendQ(){
   const s=encodeURIComponent('[UNSA] '+selTheme.label+' — '+n);
   const b=encodeURIComponent('Thème: '+selTheme.label+'\nSpécialiste: '+selTheme.rep+'\n\nDe: '+n+' ('+profile.email+')\nTél: '+(profile.telephone||'—')+'\nMétier: '+(profile.metier||'—')+'\n\n'+txt);
   window.open('mailto:aurelien.herbin@grdf.fr?subject='+s+'&body='+b,'_self');
-  questionUsed=true;showStep('qStep3');
+  questionUsed=true;qCountYear++;buildNav();showStep('qStep3');
 }
 async function loadProfileQuestions(){
   if(!user)return;
@@ -478,22 +531,8 @@ async function loadProfileQuestions(){
 // ═══ MESSAGES ═══
 async function loadMessages(){
   const el=document.getElementById('msgContent');
-  if(!profile||!profile.adherent_verified){
-    // Check verification status
-    const {data:verif}=await sb.from('unsa_membership_verifications').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(1);
-    const v=verif&&verif[0];
-    let statusHTML='';
-    if(v){
-      const cls=v.status==='pending'?'vs-pending':v.status==='approved'?'vs-approved':'vs-rejected';
-      const txt=v.status==='pending'?'⏳ Vérification en cours':v.status==='approved'?'✅ Approuvé':'❌ Refusé';
-      statusHTML=`<div class="verify-status ${cls}">${txt}</div>`;
-      if(v.status==='approved'){
-        await sb.from('unsa_profiles').update({is_adherent:true,adherent_verified:true}).eq('id',user.id);
-        profile.adherent_verified=true;buildNav();loadMessages();return;
-      }
-    }
-    el.innerHTML=`<div class="msg-locked"><div style="font-size:48px;margin-bottom:16px;">🔒</div><h3>Messagerie réservée aux adhérents</h3><p>Entrez votre numéro d'adhérent pour vérification. Une fois validé, vous pourrez échanger directement avec nos représentants.</p>
-    <div class="verify-box"><h4>Vérification d'adhérent</h4><div class="fg"><label>Numéro d'adhérent</label><input class="input" id="numAdh" placeholder="Ex: UNSA-2025-0042"/></div><button class="btn btn-cyan btn-sm" onclick="submitVerif()">Soumettre</button>${statusHTML}</div></div>`;
+  if(!isAdh()){
+    el.innerHTML=`<div class="msg-locked"><div style="font-size:48px;margin-bottom:16px;">🔒</div><h3>Messagerie réservée aux adhérents</h3><p>Cette fonctionnalité est réservée aux adhérents vérifiés. Si vous êtes adhérent, votre accès sera débloqué après vérification par un administrateur.</p><button class="btn btn-mag" style="margin-top:16px;max-width:300px;" onclick="goTo('adh')">Adhérer</button></div>`;
     return;
   }
   // Verified — show messenger
@@ -557,7 +596,14 @@ function prevM(){calM--;if(calM<0){calM=11;calY--;}renderCal();}
 function nextM(){calM++;if(calM>11){calM=0;calY++;}renderCal();}
 function pickDate(y,m,d,el){document.querySelectorAll('.cal-cell').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');selDate=new Date(y,m,d);selTime=null;document.getElementById('timeSlots').classList.add('show');document.getElementById('rdvForm').classList.remove('show');}
 function confirmTime(){const v=document.getElementById('timePicker').value;if(!v)return;selTime=v.replace(':','h');document.getElementById('rdvDateLbl').textContent=selDate.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});document.getElementById('rdvTimeLbl').textContent=selTime+' — Ille et Armor';document.getElementById('rdvForm').classList.add('show');document.getElementById('rdvOk').classList.remove('show');}
-function submitRdv(){const p=document.getElementById('rdvP').value.trim(),n=document.getElementById('rdvN').value.trim(),e=document.getElementById('rdvE').value.trim();if(!p||!n||!e)return alert('Champs obligatoires.');const t=document.getElementById('rdvT').value,m=document.getElementById('rdvM').value;const ds=selDate.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});window.open('mailto:aurelien.herbin@grdf.fr?subject='+encodeURIComponent('[RDV] '+p+' '+n+' '+ds+' '+selTime)+'&body='+encodeURIComponent('RDV\n'+ds+' '+selTime+'\n'+p+' '+n+'\n'+e+'\n'+(t||'')+'\nMotif: '+(m||'—')),'_self');document.getElementById('rdvOk').classList.add('show');}
+function submitRdv(){
+  if(!isAdh()&&rdvCountYear>=1){alert('🔒 Vous avez utilisé votre RDV gratuit annuel. Adhérez pour prendre des RDV illimités.');return;}
+  const p=document.getElementById('rdvP').value.trim(),n=document.getElementById('rdvN').value.trim(),e=document.getElementById('rdvE').value.trim();if(!p||!n||!e)return alert('Champs obligatoires.');const t=document.getElementById('rdvT').value,m=document.getElementById('rdvM').value;const ds=selDate.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  // Track in DB
+  sb.from('unsa_rdv_requests').insert({user_id:user.id,rdv_date:ds,rdv_time:selTime,motif:m||null});
+  rdvCountYear++;buildNav();
+  window.open('mailto:aurelien.herbin@grdf.fr?subject='+encodeURIComponent('[RDV] '+p+' '+n+' '+ds+' '+selTime)+'&body='+encodeURIComponent('RDV\n'+ds+' '+selTime+'\n'+p+' '+n+'\n'+e+'\n'+(t||'')+'\nMotif: '+(m||'—')),'_self');document.getElementById('rdvOk').classList.add('show');
+}
 function pickFormule(idx){document.getElementById('adhFormule').selectedIndex=idx;updatePrice();document.getElementById('adhForm').scrollIntoView({behavior:'smooth'});}
 function updatePrice(){const idx=document.getElementById('adhFormule').selectedIndex;const prices=[{amount:'1,70€',period:'/mois'},{amount:'5,10€',period:'/trimestre'},{amount:'20,40€',period:'/an'}];document.getElementById('priceAfterTax').innerHTML=prices[idx].amount+'<span style="font-size:13px;font-weight:500;color:var(--g400);"> '+prices[idx].period+'</span>';}
 function submitAdh(){const p=document.getElementById('adhPrenom').value.trim(),n=document.getElementById('adhNom').value.trim(),e=document.getElementById('adhEmail').value.trim();if(!p||!n||!e)return alert('Obligatoire.');const fSel=document.getElementById('adhFormule');const formule=fSel.options[fSel.selectedIndex].text;window.open('mailto:aurelien.herbin@grdf.fr?subject='+encodeURIComponent('[Adhésion] '+p+' '+n)+'&body='+encodeURIComponent('Adhésion\n'+p+' '+n+'\n'+e+'\n'+document.getElementById('adhTel').value+'\nFormule: '+formule+'\nStatut: '+document.getElementById('adhStatut').value),'_self');document.getElementById('adhSuccess').classList.add('show');}
