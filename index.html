@@ -160,6 +160,9 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 .profile-wrap{max-width:620px;margin:0 auto;}
 .profile-avatar{width:90px;height:90px;border-radius:50%;background:var(--g100);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 10px;overflow:hidden;border:3px solid var(--g200);cursor:pointer;}
 .profile-avatar img{width:100%;height:100%;object-fit:cover;}
+.adherent-badge{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,var(--cyan),#0891B2);color:var(--white);font-family:'Outfit';font-weight:700;font-size:11px;padding:5px 12px;border-radius:100px;letter-spacing:.3px;box-shadow:0 2px 8px rgba(4,179,222,.3);}
+.adherent-badge svg{width:14px;height:14px;fill:currentColor;}
+.badge-area{margin-top:8px;min-height:26px;}
 .profile-section{background:var(--g50);border-radius:var(--r-lg);padding:24px;margin-bottom:18px;}
 .profile-section h4{font-family:'Outfit';font-weight:700;font-size:15px;color:var(--g900);margin-bottom:14px;}
 .response-card{background:var(--white);border:1px solid var(--g200);border-radius:var(--r-md);padding:16px;margin-bottom:10px;}
@@ -203,6 +206,7 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 @keyframes spin{to{transform:rotate(360deg)}}
 .nav-locked{opacity:.4;pointer-events:none;position:relative;}
 .nav-locked::after{content:'🔒';font-size:10px;margin-left:3px;}
+.nav-verified{color:var(--cyan-dark)!important;font-weight:600!important;}
 .fab-locked{opacity:.5;background:var(--g300)!important;box-shadow:none!important;}
 .fab-locked:hover{transform:none!important;box-shadow:none!important;}
 .page-locked{position:relative;}.page-locked::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.6);z-index:10;border-radius:var(--r-xl);}
@@ -288,7 +292,7 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 <!-- RDV --><div class="page" id="p-rdv"><div class="section-wrap" style="padding-top:44px;"><div class="section-header" style="text-align:center;"><h2>Prendre rendez-vous</h2><p style="margin:0 auto;">Gratuit et confidentiel. Minimum 7 jours de préavis.</p></div><div style="max-width:680px;margin:0 auto;"><div class="calendar-wrap"><div class="cal-header"><h4 id="calMonth"></h4><div class="cal-nav"><button onclick="prevM()">‹</button><button onclick="nextM()">›</button></div></div><div class="cal-days"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div><div class="cal-grid" id="calGrid"></div></div><div class="time-slots" id="timeSlots" style="align-items:center;"><div class="fg" style="margin-bottom:0;flex:1;min-width:200px;"><label>Heure souhaitée</label><input class="input" type="time" id="timePicker" min="08:00" max="18:00" value="10:00" step="900" style="font-family:'Outfit';font-weight:600;"/></div><button class="btn btn-cyan btn-sm" style="width:auto;margin-top:18px;" onclick="confirmTime()">Valider l'heure</button></div><div class="rdv-form" id="rdvForm"><div class="rdv-summary"><div class="s-icon">📅</div><div class="s-detail"><strong id="rdvDateLbl"></strong><span id="rdvTimeLbl"></span></div></div><div class="form-row"><div class="fg"><label>Prénom</label><input class="input" id="rdvP"/></div><div class="fg"><label>Nom</label><input class="input" id="rdvN"/></div></div><div class="form-row"><div class="fg"><label>Email</label><input class="input" id="rdvE" type="email"/></div><div class="fg"><label>Téléphone</label><input class="input" id="rdvT"/></div></div><div class="fg"><label>Motif</label><input class="input" id="rdvM"/></div><button class="btn btn-cyan" onclick="submitRdv()">Confirmer</button><div class="success-msg" id="rdvOk"><div class="success-check">✓</div><h4>RDV demandé</h4><p>Confirmation par email.</p></div></div></div></div></div>
 <!-- IEG --><div class="page" id="p-ieg"><div class="section-wrap" style="padding-top:44px;"><div class="ieg-hero"><h2>Avantages IEG</h2><p>Offres négociées pour les salariés et retraités des IEG.</p><a href="https://avantagesieg.com/" target="_blank" class="ieg-link">Découvrir →</a></div><div class="section-header"><h2>En un coup d'œil</h2></div><div class="ieg-grid"><div class="ieg-card"><div class="ic-icon">✈️</div><h4>Voyages & Séjours</h4><p>Offres négociées sur séjours, circuits et croisières.</p></div><div class="ieg-card"><div class="ic-icon">🎭</div><h4>Spectacles & Cinéma</h4><p>Tarifs préférentiels pour vos sorties.</p></div><div class="ieg-card"><div class="ic-icon">🛒</div><h4>Shopping</h4><p>Réductions et offres partenaires.</p></div><div class="ieg-card"><div class="ic-icon">🏋️</div><h4>Sport & Bien-être</h4><p>Réductions sur vos abonnements.</p></div><div class="ieg-card"><div class="ic-icon">🍽️</div><h4>Restauration</h4><p>Avantages sur la restauration.</p></div><div class="ieg-card"><div class="ic-icon">🚗</div><h4>Mobilité</h4><p>Offres location et assurance.</p></div></div></div></div>
 <!-- MESSAGES --><div class="page" id="p-messages"><div class="section-wrap" style="padding-top:44px;"><div id="msgContent"></div></div></div>
-<!-- PROFIL --><div class="page" id="p-profil"><div class="section-wrap" style="padding-top:44px;"><div class="section-header" style="text-align:center;"><h2>Mon profil</h2></div><div class="profile-wrap"><div style="text-align:center;margin-bottom:28px;"><div class="profile-avatar" id="profAvatar" onclick="document.getElementById('photoIn').click()">👤</div><input type="file" id="photoIn" accept="image/*" style="display:none;" onchange="uploadPhoto(event)"/><div style="font-size:12px;color:var(--cyan);font-weight:600;cursor:pointer;font-family:'Outfit';" onclick="document.getElementById('photoIn').click()">Changer la photo</div></div><div class="profile-section"><h4>Informations</h4><div class="form-row"><div class="fg"><label>Prénom</label><input class="input" id="profPrenom" oninput="saveProf()"/></div><div class="fg"><label>Nom</label><input class="input" id="profNom" oninput="saveProf()"/></div></div><div class="form-row"><div class="fg"><label>Email</label><input class="input" id="profEmail" disabled/></div><div class="fg"><label>Téléphone</label><input class="input" id="profTel" oninput="saveProf()"/></div></div><div class="form-row"><div class="fg"><label>Métier</label><input class="input" id="profMetier" oninput="saveProf()"/></div><div class="fg"><label>Agence</label><input class="input" id="profAgence" value="Ille et Armor" oninput="saveProf()"/></div></div></div><div class="profile-section"><h4>Mes questions</h4><div id="profQuestions"></div></div><div style="text-align:center;margin-top:18px;"><button class="btn btn-outline btn-sm" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="doLogout()">Déconnexion</button></div></div></div></div>
+<!-- PROFIL --><div class="page" id="p-profil"><div class="section-wrap" style="padding-top:44px;"><div class="section-header" style="text-align:center;"><h2>Mon profil</h2></div><div class="profile-wrap"><div style="text-align:center;margin-bottom:28px;"><div class="profile-avatar" id="profAvatar" onclick="document.getElementById('photoIn').click()">👤</div><input type="file" id="photoIn" accept="image/*" style="display:none;" onchange="uploadPhoto(event)"/><div style="font-size:12px;color:var(--cyan);font-weight:600;cursor:pointer;font-family:'Outfit';" onclick="document.getElementById('photoIn').click()">Changer la photo</div><div class="badge-area" id="badgeArea"></div></div><div class="profile-section"><h4>Informations</h4><div class="form-row"><div class="fg"><label>Prénom</label><input class="input" id="profPrenom" oninput="saveProf()"/></div><div class="fg"><label>Nom</label><input class="input" id="profNom" oninput="saveProf()"/></div></div><div class="form-row"><div class="fg"><label>Email</label><input class="input" id="profEmail" disabled/></div><div class="fg"><label>Téléphone</label><input class="input" id="profTel" oninput="saveProf()"/></div></div><div class="form-row"><div class="fg"><label>Métier</label><input class="input" id="profMetier" oninput="saveProf()"/></div><div class="fg"><label>Agence</label><input class="input" id="profAgence" value="Ille et Armor" oninput="saveProf()"/></div></div></div><div class="profile-section"><h4>Mes questions & réponses</h4><div id="profQuestions"></div></div><div style="text-align:center;margin-top:18px;"><button class="btn btn-outline btn-sm" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="doLogout()">Déconnexion</button></div></div></div></div>
 </main>
 <div class="footer"><div class="footer-inner"><div class="footer-brand">UNSA <em>Énergie</em></div><div class="footer-info">Ille et Armor</div><div class="footer-links"><a onclick="goTo('about')">Qui sommes-nous</a><a href="admin.html">Admin</a></div></div></div>
 
@@ -389,6 +393,9 @@ async function loadProfile(){
     if(profile.metier)document.getElementById('profMetier').value=profile.metier;
     if(profile.agence)document.getElementById('profAgence').value=profile.agence;
     if(profile.photo_url){document.getElementById('profAvatar').innerHTML='<img src="'+profile.photo_url+'" alt=""/>';}
+    // Adherent badge
+    const ba=document.getElementById('badgeArea');
+    if(ba){ba.innerHTML=profile.adherent_verified?'<span class="adherent-badge"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Adhérent vérifié</span>':'';}
   }
   loadProfileQuestions();
   // Load yearly usage counts
@@ -434,7 +441,7 @@ function buildNav(){
     ['rdv','RDV',(!adh&&rdvCountYear>=1)?'nav-locked':''],
     ['ieg','Avantages IEG'],
     ['messages','💬 Messages',!adh?'nav-locked':''],
-    ['profil','Profil'],
+    ['profil',adh?'✓ Profil':'Profil',adh?'nav-verified':''],
     ...(!adh?[['adh','Adhérer','nav-cta']]:[])
   ];
   const html=links.map(([id,label,cls])=>`<li><a class="${cls||''}" onclick="navClick('${id}',this)">${label}</a></li>`).join('');
@@ -524,8 +531,21 @@ async function loadProfileQuestions(){
   if(!user)return;
   const {data}=await sb.from('unsa_questions').select('*').eq('user_id',user.id).order('created_at',{ascending:false});
   const el=document.getElementById('profQuestions');
-  if(!data||data.length===0){el.innerHTML='<div class="no-data">Aucune question.</div>';return;}
-  el.innerHTML=data.map(q=>`<div class="response-card"><div class="rc-q"><strong>${esc(q.theme)}</strong> — ${esc(q.question_text)}</div>${q.response?`<div class="rc-a">💬 ${esc(q.response)}</div>`:''}${q.status==='answered'?`<div class="rc-meta">Répondu le ${new Date(q.responded_at).toLocaleDateString('fr-FR')}</div>`:'<div class="rc-meta" style="color:#F59E0B;">⏳ En attente</div>'}</div>`).join('');
+  if(!data||data.length===0){el.innerHTML='<div class="no-data">Aucune question posée.</div>';return;}
+  el.innerHTML=data.map(q=>{
+    const hasResp=q.status==='answered'&&q.response;
+    const attachHTML=q.response_attachment_url?`<a href="${esc(q.response_attachment_url)}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--cyan);text-decoration:none;margin-top:6px;padding:6px 12px;background:var(--cyan-light);border-radius:var(--r-sm);">📎 ${esc(q.response_attachment_name||'Document joint')}</a>`:'';
+    return `<div class="response-card" style="${hasResp?'border-left:3px solid var(--cyan);':'border-left:3px solid #F59E0B;'}">
+      <div class="rc-q"><strong>${esc(q.theme)}</strong> — ${esc(q.question_text)}</div>
+      <div class="rc-meta">Posée le ${new Date(q.created_at).toLocaleDateString('fr-FR')}</div>
+      ${hasResp?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--g100);">
+        <div style="font-size:11px;color:var(--cyan);font-weight:600;font-family:'Outfit';text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Réponse de l'UNSA</div>
+        <div class="rc-a">${esc(q.response)}</div>
+        ${attachHTML}
+        <div class="rc-meta">Répondu le ${new Date(q.responded_at).toLocaleDateString('fr-FR')}</div>
+      </div>`:'<div style="margin-top:8px;font-size:12px;color:#F59E0B;font-weight:600;">⏳ En attente de réponse</div>'}
+    </div>`;
+  }).join('');
 }
 
 // ═══ MESSAGES ═══
