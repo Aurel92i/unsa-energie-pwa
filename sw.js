@@ -1,4 +1,4 @@
-const CACHE_NAME = 'unsa-energie-v9';
+const CACHE_NAME = 'unsa-energie-v10';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -49,5 +49,35 @@ self.addEventListener('fetch', event => {
         return response;
       })
       .catch(() => caches.match(event.request))
+  );
+});
+
+// Push notification received
+self.addEventListener('push', event => {
+  let data = { title: 'UNSA Énergie', body: 'Nouvelle notification', icon: './icons/icon-192x192.png' };
+  try { data = { ...data, ...event.data.json() }; } catch (e) {}
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: data.icon || './icons/icon-192x192.png',
+      badge: './icons/icon-96x96.png',
+      vibrate: [200, 100, 200],
+      data: { url: data.url || './' },
+      actions: data.actions || []
+    })
+  );
+});
+
+// Notification click
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const url = event.notification.data.url || './';
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then(list => {
+      for (const client of list) {
+        if (client.url.includes('unsa-energie-pwa') && 'focus' in client) return client.focus();
+      }
+      return clients.openWindow(url);
+    })
   );
 });
