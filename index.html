@@ -781,25 +781,35 @@ function renderEvCard(e){
 }
 
 // ═══ PUSH NOTIFICATIONS ═══
+const VAPID_PUBLIC='BPVvfkZOxg9HUz98VjLwyovTN-7-vr4rfCU-oTOQlNI1PbhbZ1eZI2-VvTTZFfqQOQaHexI7tt7gfMF8OHgP71I';
+function urlB64ToUint8(b64){const p='='.repeat((4-b64.length%4)%4);const raw=atob(b64.replace(/-/g,'+').replace(/_/g,'/').concat(p));return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));}
+
 async function initPush(){
-  if(!('Notification' in window)||!('serviceWorker' in navigator))return;
-  if(Notification.permission==='granted')subscribePush();
-  else if(Notification.permission!=='denied'){
-    const perm=await Notification.requestPermission();
-    if(perm==='granted')subscribePush();
+  if(!('Notification' in window)||!('serviceWorker' in navigator)||!('PushManager' in window))return;
+  if(Notification.permission==='default'){
+    // Wait a bit before asking, don't be aggressive
+    setTimeout(async()=>{
+      const perm=await Notification.requestPermission();
+      if(perm==='granted')await subscribePush();
+    },5000);
+  }else if(Notification.permission==='granted'){
+    await subscribePush();
   }
 }
 async function subscribePush(){
   try{
     const reg=await navigator.serviceWorker.ready;
-    const sub=await reg.pushManager.getSubscription();
-    if(sub){await savePushSub(sub);return;}
-    // No VAPID key for now — just save permission state
-    await sb.from('unsa_push_subscriptions').upsert({user_id:user.id,subscription:{permission:'granted',ua:navigator.userAgent}});
-  }catch(e){console.log('Push setup skipped',e);}
-}
-async function savePushSub(sub){
-  await sb.from('unsa_push_subscriptions').upsert({user_id:user.id,subscription:sub.toJSON()});
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub){
+      sub=await reg.pushManager.subscribe({
+        userVisibleOnly:true,
+        applicationServerKey:urlB64ToUint8(VAPID_PUBLIC)
+      });
+    }
+    // Save subscription to Supabase
+    await sb.from('unsa_push_subscriptions').upsert({user_id:user.id,subscription:sub.toJSON()},{onConflict:'user_id'});
+    console.log('Push subscription saved');
+  }catch(e){console.log('Push subscription failed:',e);}
 }
 
 // PWA Service Worker
