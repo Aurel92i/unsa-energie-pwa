@@ -6,7 +6,7 @@
 <title>UNSA Énergie — Ille et Armor</title>
 <link rel="manifest" href="./manifest.json"/>
 <meta name="theme-color" content="#04B3DE"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <meta name="apple-mobile-web-app-title" content="UNSA Énergie"/>
 <link rel="apple-touch-icon" href="./icons/icon-192x192.png"/>
@@ -596,7 +596,7 @@ async function loadCarousel(){
   const vp=document.getElementById('crViewport');
   if(vp){vp.onmouseenter=()=>clearInterval(crAutoTimer);vp.onmouseleave=()=>{crAutoTimer=setInterval(()=>{crNext();},5000);};
   let tx=0;vp.ontouchstart=(e)=>{tx=e.touches[0].clientX;clearInterval(crAutoTimer);};
-  vp.ontouchend=(e)=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?crNext():crPrev();}crAutoTimer=setInterval(()=>{crNext();},5000);};}}
+  vp.ontouchend=(e)=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?crNext():crPrev();}crAutoTimer=setInterval(()=>{crNext();},5000);};}
 }
 function renderCarousel(){
   const track=document.getElementById('crTrack');if(!track)return;
