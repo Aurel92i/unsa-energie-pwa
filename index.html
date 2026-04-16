@@ -242,6 +242,28 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 .ev-date-box .ev-m{font-family:'Outfit';font-weight:600;font-size:11px;color:var(--cyan);text-transform:uppercase;margin-top:2px;}
 .ev-info h4{font-family:'Outfit';font-weight:700;font-size:15px;color:var(--g900);margin-bottom:3px;}.ev-info p{font-size:13px;color:var(--g500);line-height:1.5;}
 .ev-cat{display:inline-block;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:600;font-family:'Outfit';margin-top:6px;background:var(--mag-light);color:var(--mag-dark);}
+
+/* 3D CAROUSEL */
+.carousel-section{padding:60px 0;overflow:hidden;}
+.carousel-header{display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto 32px;padding:0 32px;}
+.carousel-header h2{font-family:'Outfit';font-weight:900;font-size:28px;color:var(--g900);}
+.carousel-controls{display:flex;align-items:center;gap:16px;}
+.carousel-counter{font-family:'Outfit';font-weight:900;font-size:28px;color:var(--g900);}.carousel-counter span{font-weight:400;font-size:16px;color:var(--g400);}
+.carousel-btn{width:44px;height:44px;border-radius:50%;border:2px solid var(--g200);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--g600);transition:var(--tr);}.carousel-btn:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-light);}
+.carousel-viewport{position:relative;height:400px;perspective:1200px;max-width:1200px;margin:0 auto;}
+.carousel-track{position:absolute;width:100%;height:100%;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.4,0,.2,1);}
+.carousel-card{position:absolute;width:320px;height:380px;border-radius:20px;background:var(--white);box-shadow:0 8px 40px rgba(0,0,0,.1);overflow:hidden;transition:all .6s cubic-bezier(.4,0,.2,1);cursor:pointer;backface-visibility:hidden;}
+.carousel-card .cc-img{width:100%;height:200px;object-fit:cover;background:linear-gradient(135deg,var(--cyan-light),var(--mag-light));}
+.carousel-card .cc-body{padding:20px;}
+.carousel-card .cc-tag{display:inline-block;padding:4px 12px;border-radius:100px;font-size:10px;font-weight:700;font-family:'Outfit';margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;}
+.cc-tag-actu{background:var(--cyan-light);color:var(--cyan-dark);}
+.cc-tag-doc{background:#FEF3C7;color:#92400E;}
+.cc-tag-poll{background:#E0E7FF;color:#3730A3;}
+.cc-tag-event{background:var(--mag-light);color:var(--mag-dark);}
+.carousel-card .cc-title{font-family:'Outfit';font-weight:800;font-size:17px;color:var(--g900);margin-bottom:6px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.carousel-card .cc-desc{font-size:13px;color:var(--g500);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.carousel-card .cc-date{font-size:11px;color:var(--g400);margin-top:10px;}
+@media(max-width:768px){.carousel-viewport{height:340px;}.carousel-card{width:260px;height:320px;}.carousel-card .cc-img{height:150px;}.carousel-header{padding:0 18px;}.carousel-header h2{font-size:22px;}}
 @media(max-width:768px){.header-inner{padding:0 18px;height:60px;}.nav-links{display:none;}.menu-btn{display:block;}.hero{padding:55px 18px 45px;}.hero h1{font-size:30px;}.section-wrap{padding:0 18px 50px;}.about-hero{padding:30px 20px;}.adh-form-wrap{padding:24px 18px;}.theme-grid{grid-template-columns:1fr;}.fab{bottom:18px;right:18px;height:46px;padding:0 18px;font-size:12px;}}
 /* NAV MOBILE */
 .nav-mobile{display:none;position:fixed;top:60px;left:0;right:0;bottom:0;background:rgba(255,255,255,.97);backdrop-filter:blur(20px);z-index:99;padding:18px;flex-direction:column;gap:4px;}
@@ -313,7 +335,10 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 <div class="page active" id="p-accueil">
 <div class="hero"><div class="hero-badge">Agence Ille et Armor</div><h1>Vos droits, <em>notre priorité</em></h1><p>L'UNSA Énergie vous accompagne. Posez vos questions, prenez rendez-vous, accédez à vos avantages.</p><div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;"><button class="btn btn-cyan" style="width:auto;" onclick="openQuestion()">Poser une question</button><button class="btn btn-outline" style="width:auto;" onclick="goTo('rdv')">Prendre rendez-vous</button></div></div>
 <div class="section-wrap"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:56px;"><div style="text-align:center;padding:24px 14px;background:var(--g50);border-radius:var(--r-lg);"><div style="font-family:'Outfit';font-weight:900;font-size:28px;color:var(--cyan);">18</div><div style="font-size:12px;color:var(--g400);margin-top:3px;">Spécialités</div></div><div style="text-align:center;padding:24px 14px;background:var(--g50);border-radius:var(--r-lg);"><div style="font-family:'Outfit';font-weight:900;font-size:28px;color:var(--mag);">5€</div><div style="font-size:12px;color:var(--g400);margin-top:3px;">Par mois</div></div><div style="text-align:center;padding:24px 14px;background:var(--g50);border-radius:var(--r-lg);"><div style="font-family:'Outfit';font-weight:900;font-size:28px;color:var(--cyan);">66%</div><div style="font-size:12px;color:var(--g400);margin-top:3px;">Déductible</div></div><div style="text-align:center;padding:24px 14px;background:var(--g50);border-radius:var(--r-lg);"><div style="font-family:'Outfit';font-weight:900;font-size:28px;color:var(--mag);">100%</div><div style="font-size:12px;color:var(--g400);margin-top:3px;">Confidentiel</div></div></div>
-<div class="section-header"><h2>Dernières actus</h2></div><div class="actu-grid" id="homeActus"></div><div style="text-align:center;margin-top:28px;"><button class="btn btn-outline" style="width:auto;" onclick="goTo('actus')">Toutes les actus →</button></div></div></div>
+<div class="section-header"><h2>Dernières actus</h2></div><div class="actu-grid" id="homeActus"></div><div style="text-align:center;margin-top:28px;"><button class="btn btn-outline" style="width:auto;" onclick="goTo('actus')">Toutes les actus →</button></div></div>
+<!-- 3D CAROUSEL -->
+<div class="carousel-section"><div class="carousel-header"><h2>À la une</h2><div class="carousel-controls"><div class="carousel-counter"><span id="crIdx">01</span> <span>/ <span id="crTotal">0</span></span></div><button class="carousel-btn" onclick="crPrev()">←</button><button class="carousel-btn" onclick="crNext()">→</button></div></div><div class="carousel-viewport" id="crViewport"><div class="carousel-track" id="crTrack"></div></div></div>
+</div>
 <!-- ACTUS --><div class="page" id="p-actus"><div class="section-wrap" style="padding-top:44px;"><div class="section-header"><h2>Actualités</h2></div><div class="actu-grid" id="allActus"></div></div></div>
 <!-- ABOUT --><div class="page" id="p-about"><div class="section-wrap" style="padding-top:44px;"><div class="about-hero"><h2>Qu'est-ce que l'UNSA ?</h2><p>L'UNSA, Union Nationale des Syndicats Autonomes, a été créée en 1993 autour de 5 organisations constitutives partageant les mêmes valeurs républicaines de laïcité, de démocratie, de solidarité, de liberté, d'humanisme, de justice sociale et de réformisme.</p></div><div class="section-header"><h2>Nos principes fondateurs</h2></div><div class="values-grid"><div class="value-card"><div class="value-icon" style="background:var(--cyan-light);">⚖️</div><h4>Autonomie & Indépendance</h4><p>L'UNSA affirme sa totale indépendance à l'égard des pouvoirs politiques, économiques, des partis politiques et des religions.</p></div><div class="value-card"><div class="value-icon" style="background:var(--mag-light);">🗣️</div><h4>Dialogue & Négociation</h4><p>Ni adepte du refus systématique, ni soupçonnable de complaisance. L'UNSA privilégie toujours le dialogue pour faire aboutir les revendications.</p></div><div class="value-card"><div class="value-icon" style="background:var(--cyan-light);">🏛️</div><h4>Démocratie</h4><p>C'est la base qui décide des grandes orientations. Chaque adhérent participe aux débats et fixe les orientations par ses votes.</p></div><div class="value-card"><div class="value-icon" style="background:var(--mag-light);">🤝</div><h4>Progrès social</h4><p>L'UNSA s'est fixé comme objectif de promouvoir un progrès social durable et de lutter contre toutes les formes d'exclusion.</p></div><div class="value-card"><div class="value-icon" style="background:var(--cyan-light);">🇪🇺</div><h4>Dimension européenne</h4><p>Membre de la Confédération Européenne des Syndicats (CES), l'UNSA participe activement à la construction d'une Europe sociale.</p></div><div class="value-card"><div class="value-icon" style="background:var(--mag-light);">💪</div><h4>370 000 adhérents</h4><p>L'UNSA constitue l'une des premières forces syndicales représentées, avec une représentativité reconnue au niveau national et européen.</p></div></div><div class="discretion-box"><div style="font-size:24px;">🔒</div><div><h4>Adhésion confidentielle</h4><p>Chaque organisation syndicale exerce sa responsabilité dans la plus grande autonomie. <strong>Vous n'avez aucune obligation de déclarer votre adhésion à votre employeur.</strong> Votre hiérarchie n'est pas informée.</p></div></div></div></div>
 <!-- ADHERER --><div class="page" id="p-adh"><div class="section-wrap" style="padding-top:44px;"><div class="section-header" style="text-align:center;"><h2>Rejoignez l'UNSA Énergie</h2></div><div class="tax-notice">💡 <strong>66% déductible des impôts.</strong> 60€/an = 20,40€ net.</div><div class="pricing-grid"><div class="price-card"><div class="price-label">Mensuel</div><div class="price-amount">5<span>€</span></div><div class="price-period">par mois</div><div style="font-size:12px;color:var(--cyan);font-weight:600;margin-bottom:14px;">soit 1,70€ après déduction fiscale</div><button class="btn btn-cyan btn-sm" onclick="pickFormule(0)">Choisir</button></div><div class="price-card popular"><div class="price-label">Trimestriel</div><div class="price-amount">15<span>€</span></div><div class="price-period">par trimestre</div><div style="font-size:12px;color:var(--mag);font-weight:600;margin-bottom:14px;">soit 5,10€ après déduction fiscale</div><button class="btn btn-mag btn-sm" onclick="pickFormule(1)">Choisir</button></div><div class="price-card"><div class="price-label">Annuel</div><div class="price-amount">60<span>€</span></div><div class="price-period">par an</div><div style="font-size:12px;color:var(--cyan);font-weight:600;margin-bottom:14px;">soit 20,40€ après déduction fiscale</div><button class="btn btn-cyan btn-sm" onclick="pickFormule(2)">Choisir</button></div></div><div class="adh-form-wrap" id="adhForm"><h3>Demande d'adhésion</h3><div class="sub">Un représentant vous contactera en toute discrétion.</div><div class="form-row"><div class="fg"><label>Prénom</label><input class="input" id="adhPrenom"/></div><div class="fg"><label>Nom</label><input class="input" id="adhNom"/></div></div><div class="form-row"><div class="fg"><label>Email</label><input class="input" id="adhEmail" type="email"/></div><div class="fg"><label>Téléphone</label><input class="input" id="adhTel"/></div></div><div class="form-row"><div class="fg"><label>Formule</label><select class="input" id="adhFormule" onchange="updatePrice()"><option value="0">Mensuel — 5€/mois</option><option value="1" selected>Trimestriel — 15€/trimestre</option><option value="2">Annuel — 60€/an</option></select></div><div class="fg"><label>Statut</label><select class="input" id="adhStatut"><option>Agent d'exécution</option><option>Agent de maîtrise</option><option>Cadre</option><option>Autre</option></select></div></div><div id="priceDisplay" style="background:var(--cyan-light);border-radius:10px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:13px;color:var(--g600);">Vous paierez</div><div style="font-family:'Outfit';font-weight:800;font-size:22px;color:var(--cyan-dark);" id="priceAfterTax">5,10€<span style="font-size:13px;font-weight:500;color:var(--g400);"> /trimestre</span></div></div><div style="font-size:11px;color:var(--g400);text-align:right;">après déduction<br/>fiscale de 66%</div></div><button class="btn btn-cyan" onclick="submitAdh()">Envoyer ma demande</button><div class="success-msg" id="adhSuccess"><div class="success-check">✓</div><h4>Demande envoyée</h4><p>Un représentant vous contactera.</p></div></div></div></div>
@@ -371,7 +396,7 @@ const MFR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','S
   if(data.session){user=data.session.user;await loadProfile();document.getElementById('authOverlay').classList.add('hidden');initPush();}
   buildNav();buildThemeGrid();
   const now=new Date();calY=now.getFullYear();calM=now.getMonth();renderCal();
-  loadActus();
+  loadActus();loadCarousel();
 })();
 
 // ═══ AUTH ═══
@@ -550,6 +575,58 @@ function showActuDetail(idx){
   document.getElementById('actuDetImg').innerHTML=a.image_url?'<img src="'+esc(a.image_url)+'" style="width:100%;border-radius:var(--r-md);"/>':'';
   document.getElementById('actuOverlay').classList.add('open');
 }
+
+// ═══ 3D CAROUSEL ═══
+let crItems=[],crCurrent=0,crAutoTimer=null;
+async function loadCarousel(){
+  const [actusRes,eventsRes,pollsRes]=await Promise.all([
+    sb.from('unsa_actus').select('*').order('created_at',{ascending:false}).limit(6),
+    sb.from('unsa_events').select('*').gte('event_date',new Date().toISOString().split('T')[0]).order('event_date',{ascending:true}).limit(4),
+    sb.from('unsa_polls').select('*').eq('active',true).order('created_at',{ascending:false}).limit(3)
+  ]);
+  crItems=[];
+  (actusRes.data||[]).forEach(a=>crItems.push({type:'actu',title:a.title,desc:a.content,date:a.created_at,tag:a.tag||'Actualité',img:a.image_url,nav:'actus'}));
+  (eventsRes.data||[]).forEach(e=>crItems.push({type:'event',title:e.title,desc:(e.event_time?'🕐 '+e.event_time+' ':'')+(e.location?'📍 '+e.location:''),date:e.event_date,tag:e.category,nav:'events'}));
+  (pollsRes.data||[]).forEach(p=>crItems.push({type:'poll',title:p.title,desc:p.description||'Participez au sondage',date:p.created_at,tag:'Sondage',nav:'sondages'}));
+  if(!crItems.length)return;
+  crCurrent=0;
+  document.getElementById('crTotal').textContent=String(crItems.length).padStart(2,'0');
+  renderCarousel();
+  crAutoTimer=setInterval(()=>{crNext();},5000);
+  const vp=document.getElementById('crViewport');
+  if(vp){vp.onmouseenter=()=>clearInterval(crAutoTimer);vp.onmouseleave=()=>{crAutoTimer=setInterval(()=>{crNext();},5000);};
+  let tx=0;vp.ontouchstart=(e)=>{tx=e.touches[0].clientX;clearInterval(crAutoTimer);};
+  vp.ontouchend=(e)=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?crNext():crPrev();}crAutoTimer=setInterval(()=>{crNext();},5000);};}}
+}
+function renderCarousel(){
+  const track=document.getElementById('crTrack');if(!track)return;
+  const vw=document.getElementById('crViewport').offsetWidth;
+  const centerX=vw/2-160;
+  track.innerHTML='';
+  const gradients={actu:'linear-gradient(135deg,#04B3DE,#0891B2)',event:'linear-gradient(135deg,#EE0A9F,#A8076F)',poll:'linear-gradient(135deg,#6366F1,#4338CA)',doc:'linear-gradient(135deg,#F59E0B,#D97706)'};
+  const tagCls={actu:'cc-tag-actu',event:'cc-tag-event',poll:'cc-tag-poll',doc:'cc-tag-doc'};
+  crItems.forEach((item,i)=>{
+    const offset=i-crCurrent;
+    const card=document.createElement('div');
+    card.className='carousel-card';
+    const absOff=Math.abs(offset);
+    const x=centerX+(offset*260);
+    const z=-absOff*120;
+    const rotY=offset*-15;
+    const scale=absOff===0?1:Math.max(0.7,1-absOff*0.15);
+    const opacity=absOff>2?0:absOff===0?1:0.7;
+    card.style.cssText=`transform:translate3d(${x}px,0,${z}px) rotateY(${rotY}deg) scale(${scale});opacity:${opacity};z-index:${10-absOff};`;
+    const imgHTML=item.img?`<img class="cc-img" src="${esc(item.img)}"/>`:`<div class="cc-img" style="background:${gradients[item.type]||gradients.actu};display:flex;align-items:center;justify-content:center;font-size:48px;color:rgba(255,255,255,.4);">${item.type==='actu'?'📰':item.type==='event'?'📅':item.type==='poll'?'📊':'📁'}</div>`;
+    const fmtDate=new Date(item.date).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+    card.innerHTML=`${imgHTML}<div class="cc-body"><span class="cc-tag ${tagCls[item.type]||'cc-tag-actu'}">${esc(item.tag)}</span><div class="cc-title">${esc(item.title)}</div><div class="cc-desc">${esc(item.desc)}</div><div class="cc-date">${fmtDate}</div></div>`;
+    card.onclick=()=>{if(absOff===0)goTo(item.nav);else{crCurrent=i;renderCarousel();updateCrCounter();}};
+    track.appendChild(card);
+  });
+  updateCrCounter();
+}
+function updateCrCounter(){document.getElementById('crIdx').textContent=String(crCurrent+1).padStart(2,'0');}
+function crNext(){crCurrent=(crCurrent+1)%crItems.length;renderCarousel();}
+function crPrev(){crCurrent=(crCurrent-1+crItems.length)%crItems.length;renderCarousel();}
 
 // ═══ QUESTIONS ═══
 function buildThemeGrid(){document.getElementById('themeGrid').innerHTML=THEMES.map(t=>`<div class="theme-item" onclick="selThemeFn('${t.id}')" id="th-${t.id}"><span class="t-label">${t.icon} ${t.label}</span></div>`).join('');}
