@@ -137,6 +137,17 @@ textarea.input{resize:vertical;min-height:80px;}
 function toast(msg,type){const t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.className='toast show'+(type?' toast-'+type:'');clearTimeout(window._toastT);window._toastT=setTimeout(()=>t.classList.remove('show'),3500);}
 const sb=supabase.createClient("https://aiafvjhiprdldtwmktur.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYWZ2amhpcHJkbGR0d21rdHVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMTYzMzcsImV4cCI6MjA4NjU5MjMzN30.YP9_K6srLfHq86EsD4E-StRx_UJxwoboDz3Er4tw2yk");
 let adminUser=null,adminProfile=null,activeConvId=null,adminMsgChannel=null;
+const PUSH_URL='https://aiafvjhiprdldtwmktur.supabase.co/functions/v1/send-push';
+
+async function sendPush(title,body,userIds,url){
+  try{
+    await fetch(PUSH_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({title,body,user_ids:userIds||null,url:url||'https://aurel92i.github.io/unsa-energie-pwa/'})
+    });
+  }catch(e){console.log('Push send error',e);}
+}
 
 async function adminLogin(){
   const email=document.getElementById('lEmail').value.trim();
@@ -210,6 +221,9 @@ async function respondQ(qId){
   const update={response:txt,status:'answered',responded_by:adminUser.id,responded_at:new Date().toISOString()};
   if(attachment_url){update.response_attachment_url=attachment_url;update.response_attachment_name=attachment_name;}
   await sb.from('unsa_questions').update(update).eq('id',qId);
+  // Push notification to question author
+  const {data:q}=await sb.from('unsa_questions').select('user_id,theme').eq('id',qId).single();
+  if(q)sendPush('Réponse à votre question','Votre question sur "'+q.theme+'" a reçu une réponse.',[q.user_id]);
   loadQs();loadDash();
 }
 
@@ -228,6 +242,7 @@ async function loadVerifs(){
 async function toggleAdherent(userId,approve){
   if(!approve&&!confirm('Retirer le statut adhérent ?'))return;
   await sb.from('unsa_profiles').update({is_adherent:approve,adherent_verified:approve}).eq('id',userId);
+  if(approve)sendPush('Statut adhérent validé ✅','Votre compte a été vérifié. Vous avez maintenant accès à toutes les fonctionnalités.',[userId]);
   loadVerifs();loadDash();
 }
 
@@ -299,6 +314,7 @@ async function addActu(){
     if(!upErr){const {data:{publicUrl}}=sb.storage.from('actus-images').getPublicUrl(path);image_url=publicUrl;}
   }
   await sb.from('unsa_actus').insert({title,content,tag,image_url,created_by:adminUser.id});
+  sendPush('📰 Nouvelle actualité',title);
   document.getElementById('nActuTitle').value='';document.getElementById('nActuText').value='';document.getElementById('nActuTag').value='';fileInput.value='';
   loadActus();
 }
@@ -322,7 +338,7 @@ async function addDoc(){
     created_by:adminUser.id
   });
   document.getElementById('nDocTitle').value='';document.getElementById('nDocDesc').value='';fileInput.value='';
-  toast('Document publié','ok');loadAdminDocs();
+  toast('Document publié','ok');sendPush('📁 Nouveau document',title);loadAdminDocs();
 }
 async function loadAdminDocs(){
   const {data}=await sb.from('unsa_documents').select('*').order('created_at',{ascending:false});
@@ -343,7 +359,7 @@ async function addPoll(){
     created_by:adminUser.id
   });
   document.getElementById('nPollTitle').value='';document.getElementById('nPollDesc').value='';document.getElementById('nPollOpts').value='';document.getElementById('nPollEnd').value='';
-  toast('Sondage créé','ok');loadAdminPolls();
+  toast('Sondage créé','ok');sendPush('📊 Nouveau sondage',title);loadAdminPolls();
 }
 async function loadAdminPolls(){
   const {data:polls}=await sb.from('unsa_polls').select('*').order('created_at',{ascending:false});
@@ -372,8 +388,9 @@ async function addEvent(){
     adherent_only:document.getElementById('nEvAccess').value==='true',
     created_by:adminUser.id
   });
+  const evDate=document.getElementById('nEvDate').value;
   document.getElementById('nEvTitle').value='';document.getElementById('nEvDate').value='';document.getElementById('nEvTime').value='';document.getElementById('nEvLoc').value='';document.getElementById('nEvDesc').value='';
-  toast('Événement publié','ok');loadAdminEvents();
+  toast('Événement publié','ok');sendPush('📅 Nouvel événement',title+(evDate?' — '+evDate:''));loadAdminEvents();
 }
 async function loadAdminEvents(){
   const {data}=await sb.from('unsa_events').select('*').order('event_date',{ascending:true});
