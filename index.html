@@ -161,6 +161,11 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 .profile-avatar{width:90px;height:90px;border-radius:50%;background:var(--g100);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 10px;overflow:hidden;border:3px solid var(--g200);cursor:pointer;}
 .profile-avatar img{width:100%;height:100%;object-fit:cover;}
 .adherent-badge{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,var(--cyan),#0891B2);color:var(--white);font-family:'Outfit';font-weight:700;font-size:11px;padding:5px 12px;border-radius:100px;letter-spacing:.3px;box-shadow:0 2px 8px rgba(4,179,222,.3);}
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--g900);color:var(--white);padding:14px 22px;border-radius:12px;font-family:'Outfit';font-weight:600;font-size:14px;box-shadow:0 10px 40px rgba(0,0,0,.25);z-index:9999;max-width:90%;text-align:center;transition:transform .3s cubic-bezier(.4,0,.2,1);pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.toast-err{background:var(--mag);}
+.toast.toast-warn{background:#F59E0B;}
+.toast.toast-ok{background:#10B981;}
 .adherent-badge svg{width:14px;height:14px;fill:currentColor;}
 .badge-area{margin-top:8px;min-height:26px;}
 .profile-section{background:var(--g50);border-radius:var(--r-lg);padding:24px;margin-bottom:18px;}
@@ -262,7 +267,7 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 <div class="nav-mobile" id="mobileNav"></div>
 
 <!-- FAB -->
-<button class="fab" onclick="openQuestion()">Poser une question</button>
+<button class="fab" onclick="openQuestion()">✉ Poser une question</button>
 
 <!-- Q MODAL -->
 <div class="overlay" id="qOverlay" onclick="if(event.target===this)closeQ()"><div class="modal">
@@ -273,6 +278,8 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 <div class="step" id="qStep3"><div class="success-msg show"><div class="success-check">✓</div><h4>Question envoyée</h4><p>Vous recevrez une réponse dans les meilleurs délais.</p><button class="btn btn-outline" style="margin-top:14px;" onclick="closeQ()">Fermer</button></div></div>
 <div class="step" id="qStepLimit"><div style="text-align:center;padding:16px 0;"><div style="font-size:40px;margin-bottom:12px;">🔒</div><h4 style="font-family:'Outfit';font-weight:800;font-size:18px;color:var(--g900);margin-bottom:6px;">Question annuelle utilisée</h4><p style="font-size:13px;color:var(--g400);margin-bottom:14px;line-height:1.6;">Vous avez posé votre question gratuite cette année. Adhérez pour poser des questions illimitées ou prenez un RDV gratuit.</p><button class="btn btn-mag" onclick="closeQ();goTo('adh')">Adhérer pour débloquer</button><button class="btn btn-outline" style="margin-top:7px;" onclick="closeQ();goTo('rdv')">Prendre RDV</button></div></div>
 </div></div></div>
+
+<div class="toast" id="toast"></div>
 
 <!-- ACTU DETAIL MODAL -->
 <div class="overlay" id="actuOverlay" onclick="if(event.target===this)this.classList.remove('open')"><div class="modal" style="max-width:600px;">
@@ -328,6 +335,7 @@ const THEMES=[
 ];
 
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function toast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(type?' toast-'+type:'');clearTimeout(window._toastT);window._toastT=setTimeout(()=>t.classList.remove('show'),3500);}
 const MFR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
 // ═══ INIT ═══
@@ -423,7 +431,7 @@ async function uploadPhoto(ev){
   const ext=file.name.split('.').pop();
   const path=user.id+'/avatar.'+ext;
   const {error}=await sb.storage.from('avatars').upload(path,file,{upsert:true});
-  if(error){alert('Erreur upload: '+error.message);return;}
+  if(error){toast('Erreur lors du téléversement','err');return;}
   const {data:{publicUrl}}=sb.storage.from('avatars').getPublicUrl(path);
   const url=publicUrl+'?t='+Date.now();
   await sb.from('unsa_profiles').update({photo_url:url}).eq('id',user.id);
@@ -455,8 +463,8 @@ function buildNav(){
 }
 function navClick(id,el){
   const adh=isAdh();
-  if(id==='messages'&&!adh){alert('🔒 La messagerie est réservée aux adhérents. Adhérez pour débloquer cette fonctionnalité.');return;}
-  if(id==='rdv'&&!adh&&rdvCountYear>=1){alert('🔒 Vous avez utilisé votre RDV gratuit annuel. Adhérez pour prendre des RDV illimités.');return;}
+  if(id==='messages'&&!adh){toast('🔒 La messagerie est réservée aux adhérents','warn');return;}
+  if(id==='rdv'&&!adh&&rdvCountYear>=1){toast('🔒 RDV annuel déjà utilisé. Adhérez pour des RDV illimités','warn');return;}
   goTo(id,el);
 }
 function goTo(id,el){
@@ -626,8 +634,8 @@ function nextM(){calM++;if(calM>11){calM=0;calY++;}renderCal();}
 function pickDate(y,m,d,el){document.querySelectorAll('.cal-cell').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');selDate=new Date(y,m,d);selTime=null;document.getElementById('timeSlots').classList.add('show');document.getElementById('rdvForm').classList.remove('show');}
 function confirmTime(){const v=document.getElementById('timePicker').value;if(!v)return;selTime=v.replace(':','h');document.getElementById('rdvDateLbl').textContent=selDate.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});document.getElementById('rdvTimeLbl').textContent=selTime+' — Ille et Armor';document.getElementById('rdvForm').classList.add('show');document.getElementById('rdvOk').classList.remove('show');}
 function submitRdv(){
-  if(!isAdh()&&rdvCountYear>=1){alert('🔒 Vous avez utilisé votre RDV gratuit annuel. Adhérez pour prendre des RDV illimités.');return;}
-  const p=document.getElementById('rdvP').value.trim(),n=document.getElementById('rdvN').value.trim(),e=document.getElementById('rdvE').value.trim();if(!p||!n||!e)return alert('Champs obligatoires.');const t=document.getElementById('rdvT').value,m=document.getElementById('rdvM').value;const ds=selDate.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  if(!isAdh()&&rdvCountYear>=1){toast('🔒 RDV annuel déjà utilisé. Adhérez pour des RDV illimités','warn');return;}
+  const p=document.getElementById('rdvP').value.trim(),n=document.getElementById('rdvN').value.trim(),e=document.getElementById('rdvE').value.trim();if(!p||!n||!e){toast('Merci de compléter les champs obligatoires','err');return;}const t=document.getElementById('rdvT').value,m=document.getElementById('rdvM').value;const ds=selDate.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   // Track in DB
   sb.from('unsa_rdv_requests').insert({user_id:user.id,rdv_date:ds,rdv_time:selTime,motif:m||null});
   rdvCountYear++;buildNav();
@@ -635,7 +643,7 @@ function submitRdv(){
 }
 function pickFormule(idx){document.getElementById('adhFormule').selectedIndex=idx;updatePrice();document.getElementById('adhForm').scrollIntoView({behavior:'smooth'});}
 function updatePrice(){const idx=document.getElementById('adhFormule').selectedIndex;const prices=[{amount:'1,70€',period:'/mois'},{amount:'5,10€',period:'/trimestre'},{amount:'20,40€',period:'/an'}];document.getElementById('priceAfterTax').innerHTML=prices[idx].amount+'<span style="font-size:13px;font-weight:500;color:var(--g400);"> '+prices[idx].period+'</span>';}
-function submitAdh(){const p=document.getElementById('adhPrenom').value.trim(),n=document.getElementById('adhNom').value.trim(),e=document.getElementById('adhEmail').value.trim();if(!p||!n||!e)return alert('Obligatoire.');const fSel=document.getElementById('adhFormule');const formule=fSel.options[fSel.selectedIndex].text;window.open('mailto:aurelien.herbin@grdf.fr?subject='+encodeURIComponent('[Adhésion] '+p+' '+n)+'&body='+encodeURIComponent('Adhésion\n'+p+' '+n+'\n'+e+'\n'+document.getElementById('adhTel').value+'\nFormule: '+formule+'\nStatut: '+document.getElementById('adhStatut').value),'_self');document.getElementById('adhSuccess').classList.add('show');}
+function submitAdh(){const p=document.getElementById('adhPrenom').value.trim(),n=document.getElementById('adhNom').value.trim(),e=document.getElementById('adhEmail').value.trim();if(!p||!n||!e){toast('Merci de compléter prénom, nom et email','err');return;}const fSel=document.getElementById('adhFormule');const formule=fSel.options[fSel.selectedIndex].text;window.open('mailto:aurelien.herbin@grdf.fr?subject='+encodeURIComponent('[Adhésion] '+p+' '+n)+'&body='+encodeURIComponent('Adhésion\n'+p+' '+n+'\n'+e+'\n'+document.getElementById('adhTel').value+'\nFormule: '+formule+'\nStatut: '+document.getElementById('adhStatut').value),'_self');document.getElementById('adhSuccess').classList.add('show');}
 
 // PWA Service Worker
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(r=>console.log('SW registered')).catch(e=>console.log('SW error',e));}
