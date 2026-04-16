@@ -92,6 +92,9 @@ textarea.input{resize:vertical;min-height:80px;}
 <a onclick="showP('verifs',this)">👥 Adhérents <span class="badge" id="vBadge">0</span></a>
 <a onclick="showP('messages',this)">💬 Messages</a>
 <a onclick="showP('actus',this)">📰 Actualités</a>
+<a onclick="showP('documents',this)">📁 Documents</a>
+<a onclick="showP('sondages',this)">📊 Sondages</a>
+<a onclick="showP('events',this)">📅 Événements</a>
 </div>
 <div class="sb-foot"><button class="btn btn-outline btn-sm" onclick="adminLogout()">Déconnexion</button></div>
 </div>
@@ -115,6 +118,18 @@ textarea.input{resize:vertical;min-height:80px;}
 <div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Nouvelle actualité</h4><div class="fg"><label>Titre</label><input class="input" id="nActuTitle"/></div><div class="fg"><label>Contenu</label><textarea class="input" id="nActuText"></textarea></div><div class="form-row"><div class="fg"><label>Tag</label><input class="input" id="nActuTag" placeholder="Salaires, Télétravail..."/></div><div class="fg"><label>Image (optionnel)</label><input class="input" id="nActuImg" type="file" accept="image/*" style="padding:8px;"/></div></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addActu()">Publier</button></div>
 <div id="actusList" style="margin-top:18px;"></div>
 </div>
+<!-- DOCUMENTS ADMIN -->
+<div class="panel" id="pan-documents"><div class="panel-hd"><h2>Documents & Tracts</h2></div>
+<div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Ajouter un document</h4><div class="form-row"><div class="fg"><label>Titre</label><input class="input" id="nDocTitle"/></div><div class="fg"><label>Catégorie</label><select class="input" id="nDocCat"><option>Accord</option><option>Tract</option><option>PV</option><option>Formation</option><option>Juridique</option><option>Général</option></select></div></div><div class="fg"><label>Description (optionnel)</label><input class="input" id="nDocDesc"/></div><div class="form-row"><div class="fg"><label>Fichier</label><input class="input" type="file" id="nDocFile" style="padding:8px;"/></div><div class="fg"><label>Accès</label><select class="input" id="nDocAccess"><option value="false">Tous les utilisateurs</option><option value="true">Adhérents uniquement</option></select></div></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addDoc()">Publier</button></div>
+<div id="adminDocsList" style="margin-top:18px;"></div></div>
+<!-- SONDAGES ADMIN -->
+<div class="panel" id="pan-sondages"><div class="panel-hd"><h2>Sondages & Votes</h2></div>
+<div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Créer un sondage</h4><div class="fg"><label>Question</label><input class="input" id="nPollTitle" placeholder="Ex: Êtes-vous favorable à..."/></div><div class="fg"><label>Description (optionnel)</label><input class="input" id="nPollDesc"/></div><div class="fg"><label>Options (une par ligne)</label><textarea class="input" id="nPollOpts" placeholder="Oui&#10;Non&#10;Sans avis" style="min-height:80px;"></textarea></div><div class="form-row"><div class="fg"><label>Date de fin (optionnel)</label><input class="input" type="date" id="nPollEnd"/></div><div class="fg"><label>Accès</label><select class="input" id="nPollAccess"><option value="true">Adhérents uniquement</option><option value="false">Tous</option></select></div></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addPoll()">Créer le sondage</button></div>
+<div id="adminPollsList" style="margin-top:18px;"></div></div>
+<!-- ÉVÉNEMENTS ADMIN -->
+<div class="panel" id="pan-events"><div class="panel-hd"><h2>Événements</h2></div>
+<div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Ajouter un événement</h4><div class="form-row"><div class="fg"><label>Titre</label><input class="input" id="nEvTitle"/></div><div class="fg"><label>Catégorie</label><select class="input" id="nEvCat"><option>Réunion</option><option>AG</option><option>Permanence</option><option>Formation</option><option>Date clé IEG</option><option>Autre</option></select></div></div><div class="form-row"><div class="fg"><label>Date</label><input class="input" type="date" id="nEvDate"/></div><div class="fg"><label>Heure</label><input class="input" type="time" id="nEvTime"/></div></div><div class="form-row"><div class="fg"><label>Lieu</label><input class="input" id="nEvLoc" placeholder="Salle X, Bâtiment Y..."/></div><div class="fg"><label>Accès</label><select class="input" id="nEvAccess"><option value="false">Tous</option><option value="true">Adhérents uniquement</option></select></div></div><div class="fg"><label>Description (optionnel)</label><textarea class="input" id="nEvDesc" style="min-height:60px;"></textarea></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addEvent()">Publier</button></div>
+<div id="adminEventsList" style="margin-top:18px;"></div></div>
 </div></div>
 <div class="toast" id="toast"></div>
 </div>
@@ -139,7 +154,7 @@ async function adminLogin(){
   loadDash();
 }
 async function adminLogout(){await sb.auth.signOut();location.reload();}
-function showP(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('pan-'+id).classList.add('active');document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');if(id==='dash')loadDash();if(id==='questions')loadQs();if(id==='verifs')loadVerifs();if(id==='messages')loadConvs();if(id==='actus')loadActus();}
+function showP(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('pan-'+id).classList.add('active');document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');if(id==='dash')loadDash();if(id==='questions')loadQs();if(id==='verifs')loadVerifs();if(id==='messages')loadConvs();if(id==='actus')loadActus();if(id==='documents')loadAdminDocs();if(id==='sondages')loadAdminPolls();if(id==='events')loadAdminEvents();}
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 
 // Cache profiles for merging
@@ -288,6 +303,83 @@ async function addActu(){
   loadActus();
 }
 async function delActu(id){if(!confirm('Supprimer ?'))return;await sb.from('unsa_actus').delete().eq('id',id);loadActus();}
+
+// ═══ DOCUMENTS ADMIN ═══
+async function addDoc(){
+  const title=document.getElementById('nDocTitle').value.trim();
+  const fileInput=document.getElementById('nDocFile');
+  if(!title||!fileInput.files||!fileInput.files[0]){toast('Titre et fichier requis','err');return;}
+  const file=fileInput.files[0];
+  const path='doc_'+Date.now()+'_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'');
+  const {error:upErr}=await sb.storage.from('documents').upload(path,file);
+  if(upErr){toast('Erreur upload','err');return;}
+  const {data:{publicUrl}}=sb.storage.from('documents').getPublicUrl(path);
+  await sb.from('unsa_documents').insert({
+    title,description:document.getElementById('nDocDesc').value.trim()||null,
+    category:document.getElementById('nDocCat').value,
+    file_url:publicUrl,file_name:file.name,file_size:file.size,
+    adherent_only:document.getElementById('nDocAccess').value==='true',
+    created_by:adminUser.id
+  });
+  document.getElementById('nDocTitle').value='';document.getElementById('nDocDesc').value='';fileInput.value='';
+  toast('Document publié','ok');loadAdminDocs();
+}
+async function loadAdminDocs(){
+  const {data}=await sb.from('unsa_documents').select('*').order('created_at',{ascending:false});
+  document.getElementById('adminDocsList').innerHTML=(data||[]).map(d=>`<div class="card"><div class="card-hd"><div><div class="card-title">📄 ${esc(d.title)}</div><div class="card-meta">${esc(d.category)} · ${d.adherent_only?'🔒 Adhérents':'🌐 Tous'} · ${new Date(d.created_at).toLocaleDateString('fr-FR')}</div></div><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);" onclick="delDoc('${d.id}')">Supprimer</button></div>${d.description?'<div class="card-body">'+esc(d.description)+'</div>':''}</div>`).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;">Aucun document.</div>';
+}
+async function delDoc(id){if(!confirm('Supprimer ce document ?'))return;await sb.from('unsa_documents').delete().eq('id',id);loadAdminDocs();}
+
+// ═══ SONDAGES ADMIN ═══
+async function addPoll(){
+  const title=document.getElementById('nPollTitle').value.trim();
+  const opts=document.getElementById('nPollOpts').value.split('\n').map(o=>o.trim()).filter(o=>o);
+  if(!title||opts.length<2){toast('Question et au moins 2 options requises','err');return;}
+  const endVal=document.getElementById('nPollEnd').value;
+  await sb.from('unsa_polls').insert({
+    title,description:document.getElementById('nPollDesc').value.trim()||null,
+    options:opts,adherent_only:document.getElementById('nPollAccess').value==='true',
+    ends_at:endVal?new Date(endVal+'T23:59:59').toISOString():null,
+    created_by:adminUser.id
+  });
+  document.getElementById('nPollTitle').value='';document.getElementById('nPollDesc').value='';document.getElementById('nPollOpts').value='';document.getElementById('nPollEnd').value='';
+  toast('Sondage créé','ok');loadAdminPolls();
+}
+async function loadAdminPolls(){
+  const {data:polls}=await sb.from('unsa_polls').select('*').order('created_at',{ascending:false});
+  const {data:votes}=await sb.from('unsa_votes').select('poll_id,option_index');
+  document.getElementById('adminPollsList').innerHTML=(polls||[]).map(p=>{
+    const pv=(votes||[]).filter(v=>v.poll_id===p.id);
+    const total=new Set(pv.map(v=>v.user_id)).size;
+    const optsHTML=(p.options||[]).map((o,i)=>{const c=pv.filter(v=>v.option_index===i).length;return esc(o)+' ('+c+')';}).join(' · ');
+    return `<div class="card"><div class="card-hd"><div><div class="card-title">${esc(p.title)} <span style="font-size:12px;color:${p.active?'#10B981':'var(--g400)'};">${p.active?'● Actif':'● Fermé'}</span></div><div class="card-meta">${total} vote(s) · ${optsHTML}</div></div><div style="display:flex;gap:6px;"><button class="btn btn-outline btn-xs" style="width:auto;" onclick="togglePoll('${p.id}',${!p.active})">${p.active?'Fermer':'Rouvrir'}</button><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);" onclick="delPoll('${p.id}')">Supprimer</button></div></div></div>`;
+  }).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;">Aucun sondage.</div>';
+}
+async function togglePoll(id,active){await sb.from('unsa_polls').update({active}).eq('id',id);loadAdminPolls();}
+async function delPoll(id){if(!confirm('Supprimer ce sondage et ses votes ?'))return;await sb.from('unsa_polls').delete().eq('id',id);loadAdminPolls();}
+
+// ═══ ÉVÉNEMENTS ADMIN ═══
+async function addEvent(){
+  const title=document.getElementById('nEvTitle').value.trim();
+  const date=document.getElementById('nEvDate').value;
+  if(!title||!date){toast('Titre et date requis','err');return;}
+  await sb.from('unsa_events').insert({
+    title,event_date:date,
+    event_time:document.getElementById('nEvTime').value||null,
+    location:document.getElementById('nEvLoc').value.trim()||null,
+    description:document.getElementById('nEvDesc').value.trim()||null,
+    category:document.getElementById('nEvCat').value,
+    adherent_only:document.getElementById('nEvAccess').value==='true',
+    created_by:adminUser.id
+  });
+  document.getElementById('nEvTitle').value='';document.getElementById('nEvDate').value='';document.getElementById('nEvTime').value='';document.getElementById('nEvLoc').value='';document.getElementById('nEvDesc').value='';
+  toast('Événement publié','ok');loadAdminEvents();
+}
+async function loadAdminEvents(){
+  const {data}=await sb.from('unsa_events').select('*').order('event_date',{ascending:true});
+  document.getElementById('adminEventsList').innerHTML=(data||[]).map(e=>`<div class="card"><div class="card-hd"><div><div class="card-title">📅 ${esc(e.title)}</div><div class="card-meta">${new Date(e.event_date).toLocaleDateString('fr-FR')} ${e.event_time?' · '+esc(e.event_time):''} ${e.location?' · '+esc(e.location):''} · ${esc(e.category)} · ${e.adherent_only?'🔒 Adhérents':'🌐 Tous'}</div></div><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);" onclick="delEvent('${e.id}')">Supprimer</button></div>${e.description?'<div class="card-body">'+esc(e.description)+'</div>':''}</div>`).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;">Aucun événement.</div>';
+}
+async function delEvent(id){if(!confirm('Supprimer ?'))return;await sb.from('unsa_events').delete().eq('id',id);loadAdminEvents();}
 
 // Auto-login check
 (async function(){
