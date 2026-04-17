@@ -15,6 +15,20 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--cyan:#04B3DE;--cyan-light:#E8F7FC;--cyan-mid:#B3E8F5;--cyan-dark:#037A99;--mag:#EE0A9F;--mag-light:#FDF0F7;--mag-mid:#F9B3DB;--mag-dark:#A8076F;--white:#FFF;--g50:#FAFBFC;--g100:#F4F5F7;--g200:#E8EAED;--g300:#D1D5DB;--g400:#9CA3AF;--g500:#6B7280;--g600:#4B5563;--g700:#374151;--g800:#1F2937;--g900:#111827;--r-sm:8px;--r-md:14px;--r-lg:20px;--r-xl:28px;--sh-sm:0 2px 8px rgba(0,0,0,.05);--sh-md:0 4px 20px rgba(0,0,0,.07);--sh-lg:0 8px 40px rgba(0,0,0,.09);--tr:.28s cubic-bezier(.4,0,.2,1);}
+/* DARK MODE — override des variables */
+html[data-theme="dark"]{--white:#0F172A;--g50:#1E293B;--g100:#273344;--g200:#334155;--g300:#475569;--g400:#94A3B8;--g500:#CBD5E1;--g600:#E2E8F0;--g700:#F1F5F9;--g800:#F8FAFC;--g900:#FFFFFF;--cyan-light:rgba(4,179,222,.14);--mag-light:rgba(238,10,159,.14);--cyan-mid:rgba(4,179,222,.30);--mag-mid:rgba(238,10,159,.30);--sh-sm:0 2px 8px rgba(0,0,0,.35);--sh-md:0 4px 20px rgba(0,0,0,.45);--sh-lg:0 8px 40px rgba(0,0,0,.55);}
+html[data-theme="dark"] body{background:var(--white);color:var(--g700);}
+html[data-theme="dark"] .header{background:rgba(15,23,42,.82);border-bottom-color:rgba(255,255,255,.08);}
+html[data-theme="dark"] .nav-mobile{background:rgba(15,23,42,.97);}
+html[data-theme="dark"] .splash-phase2{background:var(--white);}
+html[data-theme="dark"] .auth-overlay{background:var(--white);}
+html[data-theme="dark"] .auth-tab.active{background:var(--g100);box-shadow:0 1px 3px rgba(0,0,0,.4);}
+html[data-theme="dark"] .toast{background:var(--g200);color:var(--g900);}
+html[data-theme="dark"] .carousel-card .cc-img > img,
+html[data-theme="dark"] .splash-logo{background:#fff;}
+.theme-toggle{display:inline-flex;align-items:center;gap:10px;background:var(--g100);border:1px solid var(--g200);border-radius:100px;padding:6px 6px 6px 14px;cursor:pointer;transition:var(--tr);font-family:'Outfit';font-weight:600;font-size:13px;color:var(--g700);}
+.theme-toggle:hover{background:var(--g200);}
+.theme-toggle .tt-icon{width:30px;height:30px;border-radius:50%;background:var(--white);display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:var(--sh-sm);}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;}
 body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--white);color:var(--g800);line-height:1.6;overflow-x:hidden;}
@@ -428,7 +442,7 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 
 <!-- MESSAGES --><div class="page" id="p-messages"><div class="section-wrap" style="padding-top:44px;"><div id="msgContent"></div></div></div>
 <!-- QUESTIONS --><div class="page" id="p-questions"><div class="section-wrap" style="padding-top:44px;"><div class="section-header"><h2>Mes questions</h2><p>Vos questions et les réponses de nos représentants.</p></div><div id="questionsPageContent"></div></div></div>
-<!-- PROFIL --><div class="page" id="p-profil"><div class="section-wrap" style="padding-top:44px;"><div class="section-header" style="text-align:center;"><h2>Mon profil</h2></div><div class="profile-wrap"><div style="text-align:center;margin-bottom:28px;"><div class="profile-avatar" id="profAvatar" onclick="document.getElementById('photoIn').click()">👤</div><input type="file" id="photoIn" accept="image/*" style="display:none;" onchange="uploadPhoto(event)"/><div style="font-size:12px;color:var(--cyan);font-weight:600;cursor:pointer;font-family:'Outfit';" onclick="document.getElementById('photoIn').click()">Changer la photo</div><div class="badge-area" id="badgeArea"></div></div><div class="profile-section"><h4>Informations</h4><div class="form-row"><div class="fg"><label>Prénom</label><input class="input" id="profPrenom" oninput="saveProf()"/></div><div class="fg"><label>Nom</label><input class="input" id="profNom" oninput="saveProf()"/></div></div><div class="form-row"><div class="fg"><label>Email</label><input class="input" id="profEmail" disabled/></div><div class="fg"><label>Téléphone</label><input class="input" id="profTel" oninput="saveProf()"/></div></div><div class="form-row"><div class="fg"><label>Métier</label><input class="input" id="profMetier" oninput="saveProf()"/></div><div class="fg"><label>Agence</label><input class="input" id="profAgence" value="Ille et Armor" oninput="saveProf()"/></div></div></div><div class="profile-section"><h4>Mes questions & réponses</h4><div id="profQuestions"></div></div><div style="text-align:center;margin-top:18px;"><button class="btn btn-outline btn-sm" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="doLogout()">Déconnexion</button></div></div></div></div>
+<!-- PROFIL --><div class="page" id="p-profil"><div class="section-wrap" style="padding-top:44px;"><div class="section-header" style="text-align:center;"><h2>Mon profil</h2></div><div class="profile-wrap"><div style="text-align:center;margin-bottom:28px;"><div class="profile-avatar" id="profAvatar" onclick="document.getElementById('photoIn').click()">👤</div><input type="file" id="photoIn" accept="image/*" style="display:none;" onchange="uploadPhoto(event)"/><div style="font-size:12px;color:var(--cyan);font-weight:600;cursor:pointer;font-family:'Outfit';" onclick="document.getElementById('photoIn').click()">Changer la photo</div><div class="badge-area" id="badgeArea"></div></div><div class="profile-section"><h4>Informations</h4><div class="form-row"><div class="fg"><label>Prénom</label><input class="input" id="profPrenom" oninput="saveProf()"/></div><div class="fg"><label>Nom</label><input class="input" id="profNom" oninput="saveProf()"/></div></div><div class="form-row"><div class="fg"><label>Email</label><input class="input" id="profEmail" disabled/></div><div class="fg"><label>Téléphone</label><input class="input" id="profTel" oninput="saveProf()"/></div></div><div class="form-row"><div class="fg"><label>Métier</label><input class="input" id="profMetier" oninput="saveProf()"/></div><div class="fg"><label>Agence</label><input class="input" id="profAgence" value="Ille et Armor" oninput="saveProf()"/></div></div></div><div class="profile-section"><h4>Apparence</h4><button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn" type="button"><span id="themeToggleLabel">Mode sombre</span><span class="tt-icon" id="themeToggleIcon">🌙</span></button></div><div class="profile-section"><h4>Mes questions & réponses</h4><div id="profQuestions"></div></div><div style="text-align:center;margin-top:18px;"><button class="btn btn-outline btn-sm" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="doLogout()">Déconnexion</button></div></div></div></div>
 </main>
 <div class="footer"><div class="footer-inner"><div class="footer-brand">UNSA <em>Énergie</em></div><div class="footer-info">Ille et Armor</div><div class="footer-links"><a onclick="goTo('about')">Qui sommes-nous</a><a href="admin.html" class="admin-link">⚙️ Admin</a></div></div></div>
 
@@ -436,6 +450,34 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 const SUPA_URL="https://aiafvjhiprdldtwmktur.supabase.co";
 const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYWZ2amhpcHJkbGR0d21rdHVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMTYzMzcsImV4cCI6MjA4NjU5MjMzN30.YP9_K6srLfHq86EsD4E-StRx_UJxwoboDz3Er4tw2yk";
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+// ═══ THEME (dark mode) ═══
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute('content', theme === 'dark' ? '#0F172A' : '#04B3DE');
+  const lbl = document.getElementById('themeToggleLabel');
+  const ico = document.getElementById('themeToggleIcon');
+  if(lbl) lbl.textContent = theme === 'dark' ? 'Mode clair' : 'Mode sombre';
+  if(ico) ico.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = cur === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('unsa-theme', next);
+  applyTheme(next);
+}
+function initTheme(){
+  const saved = localStorage.getItem('unsa-theme');
+  if(saved){ applyTheme(saved); return; }
+  const prefDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(prefDark ? 'dark' : 'light');
+}
+if(window.matchMedia){
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    if(!localStorage.getItem('unsa-theme')) applyTheme(e.matches ? 'dark' : 'light');
+  });
+}
+initTheme();
 let user=null,profile=null,questionUsed=false;
 let calY,calM,selDate=null,selTime=null,selTheme=null;
 let msgChannel=null,currentConv=null;
