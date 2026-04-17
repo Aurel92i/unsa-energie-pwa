@@ -4,7 +4,7 @@
   "description": "Syndicat UNSA Énergie — Agence Ille et Armor",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#FFFFFF",
+  "background_color": "#04B3DE",
   "theme_color": "#04B3DE",
   "orientation": "portrait-primary",
   "scope": "./",

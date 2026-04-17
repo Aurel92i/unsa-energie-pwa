@@ -20,6 +20,10 @@ textarea.input{resize:vertical;min-height:80px;}
 .btn-cyan{background:var(--cyan);color:var(--white);}.btn-cyan:hover{background:var(--cyan-dark);}
 .btn-outline{background:var(--white);color:var(--g600);border:2px solid var(--g200);}.btn-outline:hover{border-color:var(--g300);}
 .btn-sm{padding:8px 16px;font-size:12px;}.btn-xs{padding:6px 12px;font-size:11px;}
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--g900);color:var(--white);padding:14px 22px;border-radius:12px;font-family:'Outfit';font-weight:600;font-size:14px;box-shadow:0 10px 40px rgba(0,0,0,.25);z-index:9999;max-width:90%;text-align:center;transition:transform .3s cubic-bezier(.4,0,.2,1);pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.toast-err{background:var(--mag);}
+.toast.toast-ok{background:#10B981;}
 .err{color:var(--mag);font-size:12px;margin-bottom:8px;display:none;}
 .admin-wrap{display:none;min-height:100vh;}.admin-wrap.show{display:flex;}
 .sidebar{width:240px;background:var(--white);border-right:1px solid var(--g200);padding:20px 0;position:fixed;top:0;bottom:0;overflow-y:auto;}
@@ -85,9 +89,12 @@ textarea.input{resize:vertical;min-height:80px;}
 <div class="sb-nav">
 <a class="active" onclick="showP('dash',this)">📊 Dashboard</a>
 <a onclick="showP('questions',this)">💬 Questions <span class="badge" id="qBadge">0</span></a>
-<a onclick="showP('verifs',this)">✅ Vérifications <span class="badge" id="vBadge">0</span></a>
+<a onclick="showP('verifs',this)">👥 Adhérents <span class="badge" id="vBadge">0</span></a>
 <a onclick="showP('messages',this)">💬 Messages</a>
 <a onclick="showP('actus',this)">📰 Actualités</a>
+<a onclick="showP('documents',this)">📁 Documents</a>
+<a onclick="showP('sondages',this)">📊 Sondages</a>
+<a onclick="showP('events',this)">📅 Événements</a>
 </div>
 <div class="sb-foot"><button class="btn btn-outline btn-sm" onclick="adminLogout()">Déconnexion</button></div>
 </div>
@@ -95,14 +102,14 @@ textarea.input{resize:vertical;min-height:80px;}
 <!-- DASHBOARD -->
 <div class="panel active" id="pan-dash">
 <div class="panel-hd"><h2>Dashboard</h2></div>
-<div class="stats-row"><div class="stat-card"><div class="stat-num" style="color:var(--cyan);" id="sTotal">0</div><div class="stat-lbl">Questions</div></div><div class="stat-card"><div class="stat-num" style="color:#F59E0B;" id="sPend">0</div><div class="stat-lbl">En attente</div></div><div class="stat-card"><div class="stat-num" style="color:var(--mag);" id="sVerifs">0</div><div class="stat-lbl">Vérifications</div></div><div class="stat-card"><div class="stat-num" style="color:#10B981;" id="sUsers">0</div><div class="stat-lbl">Utilisateurs</div></div></div>
+<div class="stats-row"><div class="stat-card"><div class="stat-num" style="color:var(--cyan);" id="sTotal">0</div><div class="stat-lbl">Questions</div></div><div class="stat-card"><div class="stat-num" style="color:#F59E0B;" id="sPend">0</div><div class="stat-lbl">En attente</div></div><div class="stat-card"><div class="stat-num" style="color:var(--mag);" id="sVerifs">0</div><div class="stat-lbl">Non vérifiés</div></div><div class="stat-card"><div class="stat-num" style="color:#10B981;" id="sUsers">0</div><div class="stat-lbl">Utilisateurs</div></div></div>
 <h3 style="font-family:'Outfit';font-weight:700;font-size:16px;margin-bottom:14px;">Questions récentes</h3>
 <div id="dashRecent"></div>
 </div>
 <!-- QUESTIONS -->
 <div class="panel" id="pan-questions"><div class="panel-hd"><h2>Questions</h2></div><div id="qList"></div></div>
 <!-- VERIFICATIONS -->
-<div class="panel" id="pan-verifs"><div class="panel-hd"><h2>Vérifications d'adhérents</h2><p>Validez ou refusez les demandes de vérification.</p></div><div id="vList"></div></div>
+<div class="panel" id="pan-verifs"><div class="panel-hd"><h2>Gestion des adhérents</h2><p>Vérifiez et validez le statut adhérent des utilisateurs inscrits.</p></div><div id="vList"></div></div>
 <!-- MESSAGES -->
 <div class="panel" id="pan-messages"><div class="panel-hd"><h2>Messages</h2></div><div class="conv-list" id="convList"></div><div class="msg-area" id="msgArea"><div class="msg-a-header" id="msgHeader"></div><div class="msg-a-list" id="msgAList"></div><div class="msg-a-input"><input id="msgAIn" placeholder="Répondre..." onkeydown="if(event.key==='Enter')adminSendMsg()"/><button onclick="adminSendMsg()">➤</button></div></div></div>
 <!-- ACTUS -->
@@ -111,11 +118,36 @@ textarea.input{resize:vertical;min-height:80px;}
 <div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Nouvelle actualité</h4><div class="fg"><label>Titre</label><input class="input" id="nActuTitle"/></div><div class="fg"><label>Contenu</label><textarea class="input" id="nActuText"></textarea></div><div class="form-row"><div class="fg"><label>Tag</label><input class="input" id="nActuTag" placeholder="Salaires, Télétravail..."/></div><div class="fg"><label>Image (optionnel)</label><input class="input" id="nActuImg" type="file" accept="image/*" style="padding:8px;"/></div></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addActu()">Publier</button></div>
 <div id="actusList" style="margin-top:18px;"></div>
 </div>
+<!-- DOCUMENTS ADMIN -->
+<div class="panel" id="pan-documents"><div class="panel-hd"><h2>Documents & Tracts</h2></div>
+<div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Ajouter un document</h4><div class="form-row"><div class="fg"><label>Titre</label><input class="input" id="nDocTitle"/></div><div class="fg"><label>Catégorie</label><select class="input" id="nDocCat"><option>Accord</option><option>Tract</option><option>PV</option><option>Formation</option><option>Juridique</option><option>Général</option></select></div></div><div class="fg"><label>Description (optionnel)</label><input class="input" id="nDocDesc"/></div><div class="form-row"><div class="fg"><label>Fichier</label><input class="input" type="file" id="nDocFile" style="padding:8px;"/></div><div class="fg"><label>Accès</label><select class="input" id="nDocAccess"><option value="false">Tous les utilisateurs</option><option value="true">Adhérents uniquement</option></select></div></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addDoc()">Publier</button></div>
+<div id="adminDocsList" style="margin-top:18px;"></div></div>
+<!-- SONDAGES ADMIN -->
+<div class="panel" id="pan-sondages"><div class="panel-hd"><h2>Sondages & Votes</h2></div>
+<div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Créer un sondage</h4><div class="fg"><label>Question</label><input class="input" id="nPollTitle" placeholder="Ex: Êtes-vous favorable à..."/></div><div class="fg"><label>Description (optionnel)</label><input class="input" id="nPollDesc"/></div><div class="fg"><label>Options (une par ligne)</label><textarea class="input" id="nPollOpts" placeholder="Oui&#10;Non&#10;Sans avis" style="min-height:80px;"></textarea></div><div class="form-row"><div class="fg"><label>Date de fin (optionnel)</label><input class="input" type="date" id="nPollEnd"/></div><div class="fg"><label>Accès</label><select class="input" id="nPollAccess"><option value="true">Adhérents uniquement</option><option value="false">Tous</option></select></div></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addPoll()">Créer le sondage</button></div>
+<div id="adminPollsList" style="margin-top:18px;"></div></div>
+<!-- ÉVÉNEMENTS ADMIN -->
+<div class="panel" id="pan-events"><div class="panel-hd"><h2>Événements</h2></div>
+<div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Ajouter un événement</h4><div class="form-row"><div class="fg"><label>Titre</label><input class="input" id="nEvTitle"/></div><div class="fg"><label>Catégorie</label><select class="input" id="nEvCat"><option>Réunion</option><option>AG</option><option>Permanence</option><option>Formation</option><option>Date clé IEG</option><option>Autre</option></select></div></div><div class="form-row"><div class="fg"><label>Date</label><input class="input" type="date" id="nEvDate"/></div><div class="fg"><label>Heure</label><input class="input" type="time" id="nEvTime"/></div></div><div class="form-row"><div class="fg"><label>Lieu</label><input class="input" id="nEvLoc" placeholder="Salle X, Bâtiment Y..."/></div><div class="fg"><label>Accès</label><select class="input" id="nEvAccess"><option value="false">Tous</option><option value="true">Adhérents uniquement</option></select></div></div><div class="fg"><label>Description (optionnel)</label><textarea class="input" id="nEvDesc" style="min-height:60px;"></textarea></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addEvent()">Publier</button></div>
+<div id="adminEventsList" style="margin-top:18px;"></div></div>
 </div></div>
+<div class="toast" id="toast"></div>
 </div>
 <script>
+function toast(msg,type){const t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.className='toast show'+(type?' toast-'+type:'');clearTimeout(window._toastT);window._toastT=setTimeout(()=>t.classList.remove('show'),3500);}
 const sb=supabase.createClient("https://aiafvjhiprdldtwmktur.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYWZ2amhpcHJkbGR0d21rdHVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMTYzMzcsImV4cCI6MjA4NjU5MjMzN30.YP9_K6srLfHq86EsD4E-StRx_UJxwoboDz3Er4tw2yk");
 let adminUser=null,adminProfile=null,activeConvId=null,adminMsgChannel=null;
+const PUSH_URL='https://aiafvjhiprdldtwmktur.supabase.co/functions/v1/send-push';
+
+async function sendPush(title,body,userIds,url){
+  try{
+    await fetch(PUSH_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({title,body,user_ids:userIds||null,url:url||'https://aurel92i.github.io/unsa-energie-pwa/'})
+    });
+  }catch(e){console.log('Push send error',e);}
+}
 
 async function adminLogin(){
   const email=document.getElementById('lEmail').value.trim();
@@ -133,65 +165,93 @@ async function adminLogin(){
   loadDash();
 }
 async function adminLogout(){await sb.auth.signOut();location.reload();}
-function showP(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('pan-'+id).classList.add('active');document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');if(id==='dash')loadDash();if(id==='questions')loadQs();if(id==='verifs')loadVerifs();if(id==='messages')loadConvs();if(id==='actus')loadActus();}
+function showP(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('pan-'+id).classList.add('active');document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');if(id==='dash')loadDash();if(id==='questions')loadQs();if(id==='verifs')loadVerifs();if(id==='messages')loadConvs();if(id==='actus')loadActus();if(id==='documents')loadAdminDocs();if(id==='sondages')loadAdminPolls();if(id==='events')loadAdminEvents();}
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 
+// Cache profiles for merging
+let profilesCache={};
+async function loadAllProfiles(){
+  const {data}=await sb.from('unsa_profiles').select('id,prenom,nom,email,telephone,metier');
+  profilesCache={};
+  (data||[]).forEach(p=>profilesCache[p.id]=p);
+}
+
 async function loadDash(){
+  await loadAllProfiles();
   const {count:total}=await sb.from('unsa_questions').select('*',{count:'exact',head:true});
   const {count:pend}=await sb.from('unsa_questions').select('*',{count:'exact',head:true}).eq('status','pending');
-  const {count:verifs}=await sb.from('unsa_membership_verifications').select('*',{count:'exact',head:true}).eq('status','pending');
+  const {count:nonVerified}=await sb.from('unsa_profiles').select('*',{count:'exact',head:true}).eq('adherent_verified',false).eq('role','user');
   const {count:users}=await sb.from('unsa_profiles').select('*',{count:'exact',head:true});
   document.getElementById('sTotal').textContent=total||0;
   document.getElementById('sPend').textContent=pend||0;
-  document.getElementById('sVerifs').textContent=verifs||0;
+  document.getElementById('sVerifs').textContent=nonVerified||0;
   document.getElementById('sUsers').textContent=users||0;
   document.getElementById('qBadge').textContent=pend||0;
-  document.getElementById('vBadge').textContent=verifs||0;
-  const {data:recent}=await sb.from('unsa_questions').select('*,unsa_profiles(prenom,nom,email)').order('created_at',{ascending:false}).limit(5);
+  document.getElementById('vBadge').textContent=nonVerified||0;
+  const {data:recent}=await sb.from('unsa_questions').select('*').order('created_at',{ascending:false}).limit(5);
   document.getElementById('dashRecent').innerHTML=(recent||[]).map(q=>renderQCard(q)).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune question.</div>';
 }
 
 async function loadQs(){
-  const {data}=await sb.from('unsa_questions').select('*,unsa_profiles(prenom,nom,email,telephone,metier)').order('created_at',{ascending:false});
-  document.getElementById('qList').innerHTML=(data||[]).map(q=>renderQCard(q,true)).join('');
+  await loadAllProfiles();
+  const {data}=await sb.from('unsa_questions').select('*').order('created_at',{ascending:false});
+  document.getElementById('qList').innerHTML=(data||[]).map(q=>renderQCard(q,true)).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune question.</div>';
 }
 
 function renderQCard(q,full){
-  const p=q.unsa_profiles||{};
-  const name=(p.prenom||'')+' '+(p.nom||'');
+  const p=profilesCache[q.user_id]||{};
+  const name=((p.prenom||'')+ ' '+(p.nom||'')).trim()||'Utilisateur';
   const cls=q.status==='answered'?'b-answered':'b-pending';
   const txt=q.status==='answered'?'Répondue':'En attente';
-  return `<div class="card"><div class="card-hd"><div><div class="card-title">${esc(q.theme)} — ${esc(name)}</div><div class="card-meta">${esc(p.email||'')} · ${esc(p.metier||'')} · Spécialiste: ${esc(q.representant)}</div></div><span class="badge-s ${cls}">${txt}</span></div><div class="card-body">${esc(q.question_text)}</div>${full?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--g100);">${q.response?`<div style="background:var(--g50);padding:12px;border-radius:var(--r-sm);font-size:13px;margin-bottom:8px;">💬 ${esc(q.response)}</div>`:``}<textarea class="input" id="resp-${q.id}" placeholder="Votre réponse..." style="min-height:60px;">${q.response||''}</textarea><button class="btn btn-cyan btn-sm" style="width:auto;margin-top:6px;" onclick="respondQ('${q.id}')">${q.response?'Modifier':'Répondre'}</button></div>`:''}</div>`;
+  const attachHTML=q.response_attachment_url?`<div style="margin-top:6px;"><a href="${esc(q.response_attachment_url)}" target="_blank" style="font-size:12px;color:var(--cyan);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">📎 ${esc(q.response_attachment_name||'Pièce jointe')}</a></div>`:'';
+  return `<div class="card"><div class="card-hd"><div><div class="card-title">${esc(q.theme)} — ${esc(name)}</div><div class="card-meta">${esc(p.email||'')} · ${esc(p.metier||'')}</div></div><span class="badge-s ${cls}">${txt}</span></div><div class="card-body">${esc(q.question_text)}</div>${full?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--g100);">${q.response?`<div style="background:var(--g50);padding:12px;border-radius:var(--r-sm);font-size:13px;margin-bottom:8px;">💬 ${esc(q.response)}${attachHTML}</div>`:``}<textarea class="input" id="resp-${q.id}" placeholder="Votre réponse..." style="min-height:60px;">${q.response||''}</textarea><div style="margin-top:6px;"><label style="font-family:'Outfit';font-weight:600;font-size:11px;color:var(--g500);text-transform:uppercase;">📎 Pièce jointe (optionnel)</label><input type="file" id="attach-${q.id}" class="input" style="padding:8px;margin-top:4px;"/></div><button class="btn btn-cyan btn-sm" style="width:auto;margin-top:8px;" onclick="respondQ('${q.id}')">${q.response?'Modifier':'Répondre'}</button></div>`:''}</div>`;
 }
 
 async function respondQ(qId){
   const txt=document.getElementById('resp-'+qId).value.trim();
   if(!txt)return;
-  await sb.from('unsa_questions').update({response:txt,status:'answered',responded_by:adminUser.id,responded_at:new Date().toISOString()}).eq('id',qId);
+  let attachment_url=null,attachment_name=null;
+  const fileInput=document.getElementById('attach-'+qId);
+  if(fileInput&&fileInput.files&&fileInput.files[0]){
+    const file=fileInput.files[0];
+    const path='q_'+qId+'_'+Date.now()+'_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'');
+    const {error:upErr}=await sb.storage.from('question-attachments').upload(path,file);
+    if(!upErr){const {data:{publicUrl}}=sb.storage.from('question-attachments').getPublicUrl(path);attachment_url=publicUrl;attachment_name=file.name;}
+  }
+  const update={response:txt,status:'answered',responded_by:adminUser.id,responded_at:new Date().toISOString()};
+  if(attachment_url){update.response_attachment_url=attachment_url;update.response_attachment_name=attachment_name;}
+  await sb.from('unsa_questions').update(update).eq('id',qId);
+  // Push notification to question author
+  const {data:q}=await sb.from('unsa_questions').select('user_id,theme').eq('id',qId).single();
+  if(q)sendPush('Réponse à votre question','Votre question sur "'+q.theme+'" a reçu une réponse.',[q.user_id]);
   loadQs();loadDash();
 }
 
 async function loadVerifs(){
-  const {data}=await sb.from('unsa_membership_verifications').select('*,unsa_profiles(prenom,nom,email)').order('created_at',{ascending:false});
-  document.getElementById('vList').innerHTML=(data||[]).map(v=>{
-    const p=v.unsa_profiles||{};const cls=v.status==='pending'?'b-pending':v.status==='approved'?'b-approved':'b-rejected';
-    return `<div class="card"><div class="card-hd"><div><div class="card-title">${esc((p.prenom||'')+' '+(p.nom||''))}</div><div class="card-meta">${esc(p.email||'')} · N° ${esc(v.numero_adherent)}</div></div><span class="badge-s ${cls}">${v.status}</span></div>${v.status==='pending'?`<div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-cyan btn-xs" style="width:auto;background:#10B981;" onclick="verifAction('${v.id}','${v.user_id}','approved')">✅ Approuver</button><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="verifAction('${v.id}','${v.user_id}','rejected')">❌ Refuser</button></div>`:''}</div>`;
-  }).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune demande.</div>';
+  const {data}=await sb.from('unsa_profiles').select('*').order('created_at',{ascending:false});
+  const users=data||[];
+  const nonVerified=users.filter(u=>!u.adherent_verified&&u.role==='user');
+  const verified=users.filter(u=>u.adherent_verified);
+  document.getElementById('vList').innerHTML=
+    (nonVerified.length>0?'<h4 style="font-family:Outfit;font-weight:700;font-size:15px;color:var(--mag);margin-bottom:12px;">⏳ En attente de vérification ('+nonVerified.length+')</h4>'+
+    nonVerified.map(u=>`<div class="card" style="border-left:3px solid var(--mag);"><div class="card-hd"><div><div class="card-title">${esc(u.prenom||'')} ${esc(u.nom||'')}</div><div class="card-meta">${esc(u.email)} · ${esc(u.metier||'—')} · Inscrit le ${new Date(u.created_at).toLocaleDateString('fr-FR')}</div></div><span class="badge-s b-pending">Non vérifié</span></div><div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-cyan btn-xs" style="width:auto;background:#10B981;" onclick="toggleAdherent('${u.id}',true)">✅ Valider comme adhérent</button></div></div>`).join(''):'<div style="color:var(--g400);padding:14px;text-align:center;font-size:13px;margin-bottom:18px;">Aucun utilisateur en attente.</div>')+
+    '<h4 style="font-family:Outfit;font-weight:700;font-size:15px;color:#10B981;margin:24px 0 12px;">✅ Adhérents vérifiés ('+verified.length+')</h4>'+
+    (verified.length>0?verified.map(u=>`<div class="card" style="border-left:3px solid #10B981;"><div class="card-hd"><div><div class="card-title">${esc(u.prenom||'')} ${esc(u.nom||'')}</div><div class="card-meta">${esc(u.email)} · ${esc(u.metier||'—')}${u.numero_adherent?' · N° '+esc(u.numero_adherent):''}</div></div><span class="badge-s b-approved">Adhérent</span></div><div style="margin-top:8px;"><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="toggleAdherent('${u.id}',false)">Retirer le statut adhérent</button></div></div>`).join(''):'<div style="color:var(--g400);padding:14px;text-align:center;font-size:13px;">Aucun adhérent vérifié.</div>');
 }
 
-async function verifAction(vId,userId,status){
-  await sb.from('unsa_membership_verifications').update({status,reviewed_by:adminUser.id,reviewed_at:new Date().toISOString()}).eq('id',vId);
-  if(status==='approved'){
-    await sb.from('unsa_profiles').update({is_adherent:true,adherent_verified:true}).eq('id',userId);
-  }
+async function toggleAdherent(userId,approve){
+  if(!approve&&!confirm('Retirer le statut adhérent ?'))return;
+  await sb.from('unsa_profiles').update({is_adherent:approve,adherent_verified:approve}).eq('id',userId);
+  if(approve)sendPush('Statut adhérent validé ✅','Votre compte a été vérifié. Vous avez maintenant accès à toutes les fonctionnalités.',[userId]);
   loadVerifs();loadDash();
 }
 
 // MESSAGES ADMIN
 async function loadConvs(){
-  const {data}=await sb.from('unsa_conversations').select('*,unsa_profiles!unsa_conversations_user_id_fkey(prenom,nom,email)').order('last_message_at',{ascending:false});
+  await loadAllProfiles();
+  const {data}=await sb.from('unsa_conversations').select('*').order('last_message_at',{ascending:false});
   document.getElementById('convList').innerHTML=(data||[]).map(c=>{
-    const p=c.unsa_profiles||{};const name=(p.prenom||'')+' '+(p.nom||'');
+    const p=profilesCache[c.user_id]||{};const name=((p.prenom||'')+' '+(p.nom||'')).trim()||'Utilisateur';
     const time=c.last_message_at?new Date(c.last_message_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
     return `<div class="conv-item${activeConvId===c.id?' active':''}" onclick="openConv('${c.id}','${esc(name)}')"><div class="conv-av">${(p.prenom||'?')[0].toUpperCase()}</div><div class="conv-info"><div class="conv-name">${esc(name)}</div><div class="conv-preview">${esc(c.subject||'')}</div></div><div class="conv-time">${time}</div></div>`;
   }).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune conversation.</div>';
@@ -244,7 +304,7 @@ async function addActu(){
   const content=document.getElementById('nActuText').value.trim();
   const tag=document.getElementById('nActuTag').value.trim();
   const fileInput=document.getElementById('nActuImg');
-  if(!title||!content)return alert('Titre et contenu requis.');
+  if(!title||!content){toast('Titre et contenu requis','err');return;}
   let image_url=null;
   if(fileInput.files&&fileInput.files[0]){
     const file=fileInput.files[0];
@@ -254,10 +314,89 @@ async function addActu(){
     if(!upErr){const {data:{publicUrl}}=sb.storage.from('actus-images').getPublicUrl(path);image_url=publicUrl;}
   }
   await sb.from('unsa_actus').insert({title,content,tag,image_url,created_by:adminUser.id});
+  sendPush('📰 Nouvelle actualité',title);
   document.getElementById('nActuTitle').value='';document.getElementById('nActuText').value='';document.getElementById('nActuTag').value='';fileInput.value='';
   loadActus();
 }
 async function delActu(id){if(!confirm('Supprimer ?'))return;await sb.from('unsa_actus').delete().eq('id',id);loadActus();}
+
+// ═══ DOCUMENTS ADMIN ═══
+async function addDoc(){
+  const title=document.getElementById('nDocTitle').value.trim();
+  const fileInput=document.getElementById('nDocFile');
+  if(!title||!fileInput.files||!fileInput.files[0]){toast('Titre et fichier requis','err');return;}
+  const file=fileInput.files[0];
+  const path='doc_'+Date.now()+'_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'');
+  const {error:upErr}=await sb.storage.from('documents').upload(path,file);
+  if(upErr){toast('Erreur upload','err');return;}
+  const {data:{publicUrl}}=sb.storage.from('documents').getPublicUrl(path);
+  await sb.from('unsa_documents').insert({
+    title,description:document.getElementById('nDocDesc').value.trim()||null,
+    category:document.getElementById('nDocCat').value,
+    file_url:publicUrl,file_name:file.name,file_size:file.size,
+    adherent_only:document.getElementById('nDocAccess').value==='true',
+    created_by:adminUser.id
+  });
+  document.getElementById('nDocTitle').value='';document.getElementById('nDocDesc').value='';fileInput.value='';
+  toast('Document publié','ok');sendPush('📁 Nouveau document',title);loadAdminDocs();
+}
+async function loadAdminDocs(){
+  const {data}=await sb.from('unsa_documents').select('*').order('created_at',{ascending:false});
+  document.getElementById('adminDocsList').innerHTML=(data||[]).map(d=>`<div class="card"><div class="card-hd"><div><div class="card-title">📄 ${esc(d.title)}</div><div class="card-meta">${esc(d.category)} · ${d.adherent_only?'🔒 Adhérents':'🌐 Tous'} · ${new Date(d.created_at).toLocaleDateString('fr-FR')}</div></div><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);" onclick="delDoc('${d.id}')">Supprimer</button></div>${d.description?'<div class="card-body">'+esc(d.description)+'</div>':''}</div>`).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;">Aucun document.</div>';
+}
+async function delDoc(id){if(!confirm('Supprimer ce document ?'))return;await sb.from('unsa_documents').delete().eq('id',id);loadAdminDocs();}
+
+// ═══ SONDAGES ADMIN ═══
+async function addPoll(){
+  const title=document.getElementById('nPollTitle').value.trim();
+  const opts=document.getElementById('nPollOpts').value.split('\n').map(o=>o.trim()).filter(o=>o);
+  if(!title||opts.length<2){toast('Question et au moins 2 options requises','err');return;}
+  const endVal=document.getElementById('nPollEnd').value;
+  await sb.from('unsa_polls').insert({
+    title,description:document.getElementById('nPollDesc').value.trim()||null,
+    options:opts,adherent_only:document.getElementById('nPollAccess').value==='true',
+    ends_at:endVal?new Date(endVal+'T23:59:59').toISOString():null,
+    created_by:adminUser.id
+  });
+  document.getElementById('nPollTitle').value='';document.getElementById('nPollDesc').value='';document.getElementById('nPollOpts').value='';document.getElementById('nPollEnd').value='';
+  toast('Sondage créé','ok');sendPush('📊 Nouveau sondage',title);loadAdminPolls();
+}
+async function loadAdminPolls(){
+  const {data:polls}=await sb.from('unsa_polls').select('*').order('created_at',{ascending:false});
+  const {data:votes}=await sb.from('unsa_votes').select('poll_id,option_index');
+  document.getElementById('adminPollsList').innerHTML=(polls||[]).map(p=>{
+    const pv=(votes||[]).filter(v=>v.poll_id===p.id);
+    const total=new Set(pv.map(v=>v.user_id)).size;
+    const optsHTML=(p.options||[]).map((o,i)=>{const c=pv.filter(v=>v.option_index===i).length;return esc(o)+' ('+c+')';}).join(' · ');
+    return `<div class="card"><div class="card-hd"><div><div class="card-title">${esc(p.title)} <span style="font-size:12px;color:${p.active?'#10B981':'var(--g400)'};">${p.active?'● Actif':'● Fermé'}</span></div><div class="card-meta">${total} vote(s) · ${optsHTML}</div></div><div style="display:flex;gap:6px;"><button class="btn btn-outline btn-xs" style="width:auto;" onclick="togglePoll('${p.id}',${!p.active})">${p.active?'Fermer':'Rouvrir'}</button><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);" onclick="delPoll('${p.id}')">Supprimer</button></div></div></div>`;
+  }).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;">Aucun sondage.</div>';
+}
+async function togglePoll(id,active){await sb.from('unsa_polls').update({active}).eq('id',id);loadAdminPolls();}
+async function delPoll(id){if(!confirm('Supprimer ce sondage et ses votes ?'))return;await sb.from('unsa_polls').delete().eq('id',id);loadAdminPolls();}
+
+// ═══ ÉVÉNEMENTS ADMIN ═══
+async function addEvent(){
+  const title=document.getElementById('nEvTitle').value.trim();
+  const date=document.getElementById('nEvDate').value;
+  if(!title||!date){toast('Titre et date requis','err');return;}
+  await sb.from('unsa_events').insert({
+    title,event_date:date,
+    event_time:document.getElementById('nEvTime').value||null,
+    location:document.getElementById('nEvLoc').value.trim()||null,
+    description:document.getElementById('nEvDesc').value.trim()||null,
+    category:document.getElementById('nEvCat').value,
+    adherent_only:document.getElementById('nEvAccess').value==='true',
+    created_by:adminUser.id
+  });
+  const evDate=document.getElementById('nEvDate').value;
+  document.getElementById('nEvTitle').value='';document.getElementById('nEvDate').value='';document.getElementById('nEvTime').value='';document.getElementById('nEvLoc').value='';document.getElementById('nEvDesc').value='';
+  toast('Événement publié','ok');sendPush('📅 Nouvel événement',title+(evDate?' — '+evDate:''));loadAdminEvents();
+}
+async function loadAdminEvents(){
+  const {data}=await sb.from('unsa_events').select('*').order('event_date',{ascending:true});
+  document.getElementById('adminEventsList').innerHTML=(data||[]).map(e=>`<div class="card"><div class="card-hd"><div><div class="card-title">📅 ${esc(e.title)}</div><div class="card-meta">${new Date(e.event_date).toLocaleDateString('fr-FR')} ${e.event_time?' · '+esc(e.event_time):''} ${e.location?' · '+esc(e.location):''} · ${esc(e.category)} · ${e.adherent_only?'🔒 Adhérents':'🌐 Tous'}</div></div><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);" onclick="delEvent('${e.id}')">Supprimer</button></div>${e.description?'<div class="card-body">'+esc(e.description)+'</div>':''}</div>`).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;">Aucun événement.</div>';
+}
+async function delEvent(id){if(!confirm('Supprimer ?'))return;await sb.from('unsa_events').delete().eq('id',id);loadAdminEvents();}
 
 // Auto-login check
 (async function(){
