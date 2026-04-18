@@ -1,17 +1,19 @@
-const CACHE_NAME = 'unsa-energie-v28';
+const CACHE_NAME = 'unsa-energie-v29';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './admin.html',
   './manifest.json',
   './logo.png',
+  './favicon-16.png',
   './favicon.png',
+  './favicon-64.png',
+  './apple-touch-icon.png',
   './icons/icon-192x192.png',
   './icons/icon-512x512.png',
   'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap'
 ];
 
-// Install — cache core assets
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -20,7 +22,6 @@ self.addEventListener('install', event => {
   );
 });
 
-// Activate — clean old caches
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -29,19 +30,14 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch — network first, cache fallback (for dynamic content like Supabase)
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-
-  // Skip Supabase API calls — always go to network
   if (url.hostname.includes('supabase.co') || url.hostname.includes('openrouter.ai')) {
     return;
   }
-
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        // Cache successful GET requests
         if (event.request.method === 'GET' && response.status === 200) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
@@ -52,7 +48,6 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Push notification received
 self.addEventListener('push', event => {
   let data = { title: 'UNSA Énergie', body: 'Nouvelle notification', icon: './icons/icon-192x192.png' };
   try { data = { ...data, ...event.data.json() }; } catch (e) {}
@@ -68,7 +63,6 @@ self.addEventListener('push', event => {
   );
 });
 
-// Notification click
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   const url = event.notification.data.url || './';
