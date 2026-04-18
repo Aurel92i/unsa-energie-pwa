@@ -85,13 +85,16 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 .btn-mag{background:var(--mag);color:var(--white);width:100%;}.btn-mag:hover{background:var(--mag-dark);}
 .btn-outline{background:var(--white);color:var(--g600);border:2px solid var(--g200);width:100%;}.btn-outline:hover{border-color:var(--g300);}
 .btn-sm{padding:10px 18px;font-size:13px;}
-/* GOLD SHIMMER BUTTONS (accueil) */
-.gold-btn{min-width:190px;height:46px;border:none;border-radius:10px;background:linear-gradient(to right,#77530a,#ffd277,#77530a,#77530a,#ffd277,#77530a);background-size:250%;background-position:left;color:#ffd277;position:relative;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background-position 1s ease,transform .2s ease;overflow:hidden;padding:0;font-family:'Outfit',sans-serif;}
-.gold-btn::before{position:absolute;content:"";inset:2px;border-radius:8px;transition:background-position 1s ease;background:linear-gradient(to right,rgba(0,0,0,.9),rgba(20,20,20,.9),rgba(0,0,0,.9));background-size:200%;background-position:left;}
-.gold-btn:hover{background-position:right;}
+/* SHIMMER BUTTONS (accueil) — charte cyan/magenta */
+.gold-btn{min-width:190px;height:46px;border:none;border-radius:10px;background:linear-gradient(to right,#025670,#04B3DE,#025670,#025670,#04B3DE,#025670);background-size:250%;background-position:left;color:#E8F7FC;position:relative;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background-position 1s ease,transform .2s ease,box-shadow .3s ease;overflow:hidden;padding:0;font-family:'Outfit',sans-serif;box-shadow:0 4px 10px rgba(4,179,222,.3);}
+.gold-btn.gold-mag{background:linear-gradient(to right,#660044,#EE0A9F,#660044,#660044,#EE0A9F,#660044);color:#FDF0F7;box-shadow:0 4px 10px rgba(238,10,159,.3);}
+.gold-btn::before{position:absolute;content:"";inset:2px;border-radius:8px;transition:background-position 1s ease;background:linear-gradient(to right,rgba(15,23,42,.92),rgba(30,41,59,.92),rgba(15,23,42,.92));background-size:200%;background-position:left;}
+.gold-btn:hover{background-position:right;box-shadow:0 6px 18px rgba(4,179,222,.5);}
+.gold-btn.gold-mag:hover{box-shadow:0 6px 18px rgba(238,10,159,.5);}
 .gold-btn:hover::before{background-position:right;}
 .gold-btn:active{transform:scale(.95);}
-.gold-btn .gb-label{position:relative;z-index:1;padding:0 24px;color:#ffd277;font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;letter-spacing:.4px;white-space:nowrap;}
+.gold-btn .gb-label{position:relative;z-index:1;padding:0 24px;color:#E8F7FC;font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;letter-spacing:.4px;white-space:nowrap;}
+.gold-btn.gold-mag .gb-label{color:#FDF0F7;}
 /* FORMS */
 .input{width:100%;border:2px solid var(--g200);border-radius:var(--r-sm);padding:11px 15px;font-family:'DM Sans';font-size:14px;color:var(--g800);outline:none;transition:var(--tr);background:var(--g50);}
 .input:focus{border-color:var(--cyan);background:var(--white);}
@@ -431,7 +434,7 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 <main>
 <!-- ACCUEIL -->
 <div class="page active" id="p-accueil">
-<div class="hero"><div class="hero-badge">Agence Ille et Armor</div><h1>Vos droits, <em>notre priorité</em></h1><p>L'UNSA Énergie vous accompagne. Posez vos questions, prenez rendez-vous, accédez à vos avantages.</p><div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;"><button class="gold-btn" onclick="openQuestion()" type="button"><span class="gb-label">Poser une question</span></button><button class="gold-btn" onclick="goTo('rdv')" type="button"><span class="gb-label">Prendre rendez-vous</span></button></div></div>
+<div class="hero"><div class="hero-badge">Agence Ille et Armor</div><h1>Vos droits, <em>notre priorité</em></h1><p>L'UNSA Énergie vous accompagne. Posez vos questions, prenez rendez-vous, accédez à vos avantages.</p><div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;"><button class="gold-btn" onclick="openQuestion()" type="button"><span class="gb-label">Poser une question</span></button><button class="gold-btn gold-mag" onclick="goTo('rdv')" type="button"><span class="gb-label">Prendre rendez-vous</span></button></div></div>
 <div class="section-wrap"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:56px;"><div style="text-align:center;padding:24px 14px;background:var(--g50);border-radius:var(--r-lg);"><div style="font-family:'Outfit';font-weight:900;font-size:44px;color:var(--cyan);line-height:.8;">∞</div><div style="font-size:12px;color:var(--g400);margin-top:8px;">Spécialités</div></div><div style="text-align:center;padding:24px 14px;background:var(--g50);border-radius:var(--r-lg);"><div style="font-family:'Outfit';font-weight:900;font-size:28px;color:var(--mag);">5€</div><div style="font-size:12px;color:var(--g400);margin-top:3px;">Par mois</div></div><div style="text-align:center;padding:24px 14px;background:var(--g50);border-radius:var(--r-lg);"><div style="font-family:'Outfit';font-weight:900;font-size:28px;color:var(--cyan);">66%</div><div style="font-size:12px;color:var(--g400);margin-top:3px;">Déductible</div></div><div style="text-align:center;padding:24px 14px;background:var(--g50);border-radius:var(--r-lg);"><div style="font-family:'Outfit';font-weight:900;font-size:28px;color:var(--mag);">100%</div><div style="font-size:12px;color:var(--g400);margin-top:3px;">Confidentiel</div></div></div>
 <!-- 3D CAROUSEL -->
 <div class="carousel-section"><div class="carousel-header"><h2>À la une</h2><div class="carousel-controls"><div class="carousel-counter"><span id="crIdx">01</span> <span>/ <span id="crTotal">0</span></span></div><button class="carousel-btn" onclick="crPrev()">←</button><button class="carousel-btn" onclick="crNext()">→</button></div></div><div class="carousel-viewport" id="crViewport"><div class="carousel-track" id="crTrack"></div></div></div>
