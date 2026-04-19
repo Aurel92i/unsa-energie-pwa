@@ -419,7 +419,22 @@ main{padding-top:68px;}.page{display:none;}.page.active{display:block;animation:
 <div class="nav-mobile" id="mobileNav"></div>
 
 <!-- FAB -->
-<button class="fab" onclick="openQuestion()" type="button"><span class="fab-label">✉ Poser une question</span></button>
+<button class="fab" id="mainFab" onclick="handleFabClick()" type="button"><span class="fab-label" id="fabLabel">✉ Poser une question</span></button>
+<div class="overlay" id="iosInstallOverlay" onclick="if(event.target===this)closeIosInstall()">
+<div class="modal" style="max-width:420px;">
+<div style="padding:24px 24px 18px;text-align:center;">
+<div style="font-size:44px;margin-bottom:10px;">📲</div>
+<h3 style="font-family:Outfit;font-weight:900;font-size:22px;color:var(--g900);margin-bottom:8px;">Installer sur iPhone / iPad</h3>
+<p style="font-size:13px;color:var(--g500);margin-bottom:22px;line-height:1.5;">Ajoutez UNSA Énergie à votre écran d'accueil en 3 étapes.</p>
+<div style="text-align:left;background:var(--g50);border-radius:var(--r-md);padding:16px 18px;margin-bottom:16px;">
+<div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start;"><div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--cyan);color:#fff;font-family:Outfit;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px;">1</div><div style="font-size:13px;color:var(--g700);line-height:1.5;">Appuyez sur le bouton <strong style="white-space:nowrap;">Partager</strong> <span style="display:inline-block;vertical-align:middle;width:18px;height:22px;background:var(--cyan);border-radius:4px;color:#fff;font-weight:700;font-size:11px;line-height:22px;text-align:center;">↑</span> en bas de Safari.</div></div>
+<div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start;"><div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--cyan);color:#fff;font-family:Outfit;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px;">2</div><div style="font-size:13px;color:var(--g700);line-height:1.5;">Choisissez <strong>« Sur l'écran d'accueil »</strong> ➕ dans la liste.</div></div>
+<div style="display:flex;gap:12px;align-items:flex-start;"><div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--mag);color:#fff;font-family:Outfit;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px;">3</div><div style="font-size:13px;color:var(--g700);line-height:1.5;">Appuyez sur <strong>« Ajouter »</strong> — l'app apparaît sur votre écran d'accueil !</div></div>
+</div>
+<button class="btn btn-outline" style="width:auto;" onclick="closeIosInstall()" type="button">J'ai compris</button>
+</div>
+</div>
+</div>
 
 <!-- Q MODAL -->
 <div class="overlay" id="qOverlay" onclick="if(event.target===this)closeQ()"><div class="modal">
@@ -504,6 +519,89 @@ function initTheme(){
   applyTheme(saved === 'dark' ? 'dark' : 'light');
 }
 initTheme();
+
+// ═══ PWA INSTALL ═══
+let deferredInstallPrompt = null;
+
+function isStandalone(){
+  // Standalone (PWA installée et ouverte depuis l'écran d'accueil)
+  return window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true
+      || document.referrer.includes('android-app://');
+}
+function isIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  updateFabMode();
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  updateFabMode();
+  if(typeof toast==='function') toast('✓ Application installée !');
+});
+
+function handleFabClick(){
+  const mode = document.getElementById('mainFab').dataset.action || 'question';
+  if(mode === 'install'){
+    if(deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then(choice => {
+        if(choice.outcome === 'accepted'){
+          deferredInstallPrompt = null;
+          updateFabMode();
+        }
+      });
+    } else if(isIOS()){
+      document.getElementById('iosInstallOverlay').classList.add('open');
+    } else {
+      // Fallback : navigateur non supporté, on bascule sur la question
+      openQuestion();
+    }
+  } else {
+    openQuestion();
+  }
+}
+
+function closeIosInstall(){
+  document.getElementById('iosInstallOverlay').classList.remove('open');
+}
+
+function updateFabMode(){
+  const fab = document.getElementById('mainFab');
+  const label = document.getElementById('fabLabel');
+  if(!fab || !label) return;
+
+  // App déjà installée → comportement original : Poser une question
+  if(isStandalone()){
+    fab.dataset.action = 'question';
+    label.textContent = '✉ Poser une question';
+    return;
+  }
+
+  // Installable (Chrome/Edge desktop + Android) ou iOS (instructions manuelles)
+  if(deferredInstallPrompt || isIOS()){
+    fab.dataset.action = 'install';
+    label.textContent = '📲 Installer l\'app';
+    return;
+  }
+
+  // Navigateur sans support d'installation (ex: Firefox desktop) → fallback question
+  fab.dataset.action = 'question';
+  label.textContent = '✉ Poser une question';
+}
+
+// Init au chargement du DOM
+document.addEventListener('DOMContentLoaded', updateFabMode);
+// Au cas où le DOM est déjà chargé
+if(document.readyState === 'interactive' || document.readyState === 'complete'){
+  updateFabMode();
+}
+
 let user=null,profile=null,questionUsed=false;
 let calY,calM,selDate=null,selTime=null,selTheme=null;
 let msgChannel=null,currentConv=null;
