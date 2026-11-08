@@ -89,6 +89,7 @@ textarea.input{resize:vertical;min-height:80px;}
 <div class="sb-nav">
 <a class="active" onclick="showP('dash',this)">📊 Dashboard</a>
 <a onclick="showP('members',this)">📇 Base adhérents <span class="badge" id="mBadge" style="background:var(--cyan);">0</span></a>
+<a onclick="showP('adhreq',this)">📝 Demandes d'adhésion <span class="badge" id="rBadge">0</span></a>
 <a onclick="showP('verifs',this)">👥 Comptes du site</a>
 <a onclick="showP('actus',this)">📰 Actualités</a>
 <a onclick="showP('faq',this)">❓ FAQ</a>
@@ -107,6 +108,9 @@ textarea.input{resize:vertical;min-height:80px;}
 </div>
 <!-- VERIFICATIONS -->
 <div class="panel" id="pan-verifs"><div class="panel-hd"><h2>Comptes du site</h2><p>Les comptes dont l'e-mail figure dans la base adhérents sont reconnus automatiquement à la connexion. Vous pouvez aussi valider ou retirer un statut manuellement.</p></div><div id="vList"></div></div>
+<!-- DEMANDES D'ADHÉSION -->
+<div class="panel" id="pan-adhreq"><div class="panel-hd"><h2>Demandes d'adhésion</h2><p>Demandes déposées depuis la page « Adhérer ». Une demande validée ajoute la personne à la base adhérents : elle pourra ensuite créer son compte et accéder à l'espace adhérent.</p></div>
+<div id="adhReqList"></div></div>
 <!-- BASE ADHÉRENTS -->
 <div class="panel" id="pan-members"><div class="panel-hd"><h2>Base adhérents</h2><p>Retrouvez, contactez ou répondez à un adhérent. Données confidentielles : accès réservé aux administrateurs.</p></div>
 <div class="card" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
@@ -175,7 +179,7 @@ async function adminLogin(){
   loadDash();
 }
 async function adminLogout(){await sb.auth.signOut();location.reload();}
-function showP(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('pan-'+id).classList.add('active');document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');if(id==='dash')loadDash();if(id==='members')loadMembers();if(id==='verifs')loadVerifs();if(id==='actus')loadActus();if(id==='faq')loadFaqAdmin();if(id==='documents')loadAdminDocs();if(id==='events')loadAdminEvents();}
+function showP(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('pan-'+id).classList.add('active');document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');if(id==='dash')loadDash();if(id==='members')loadMembers();if(id==='adhreq')loadAdhReqs();if(id==='verifs')loadVerifs();if(id==='actus')loadActus();if(id==='faq')loadFaqAdmin();if(id==='documents')loadAdminDocs();if(id==='events')loadAdminEvents();}
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 fillRegionSelects();
 
@@ -200,6 +204,7 @@ async function loadDash(){
   document.getElementById('sAdhAccounts').textContent=adh;
   document.getElementById('sActus').textContent=act;
   document.getElementById('mBadge').textContent=m;
+  refreshReqBadge();
   const {data:recent}=await sb.from('unsa_profiles').select('prenom,nom,email,adherent_verified,created_at').order('created_at',{ascending:false}).limit(5);
   document.getElementById('dashRecent').innerHTML=(recent||[]).map(u=>`<div class="card"><div class="card-hd"><div><div class="card-title">${esc(u.prenom||'')} ${esc(u.nom||'')}</div><div class="card-meta">${esc(u.email||'')} · ${new Date(u.created_at).toLocaleDateString('fr-FR')}</div></div><span class="badge-s ${u.adherent_verified?'b-approved':'b-pending'}">${u.adherent_verified?'Adhérent':'Non adhérent'}</span></div></div>`).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucun compte.</div>';
 }
@@ -256,6 +261,29 @@ async function importMembers(ev){
     for(let i=0;i<oldIds.length;i+=200){const {error}=await sb.from('unsa_members').delete().in('id',oldIds.slice(i,i+200));if(error)throw error;}
     toast(recs.length+' adhérents importés','ok');loadMembers();
   }catch(e){toast('Erreur import : '+(e.message||e),'err');}
+}
+
+// ═══ DEMANDES D'ADHÉSION ═══
+async function refreshReqBadge(){const {count}=await sb.from('unsa_adhesion_requests').select('*',{count:'exact',head:true}).eq('status','pending');document.getElementById('rBadge').textContent=count||0;}
+async function loadAdhReqs(){
+  const {data,error}=await sb.from('unsa_adhesion_requests').select('*').order('created_at',{ascending:false});
+  if(error){toast('Erreur : '+error.message,'err');return;}
+  const reqs=data||[];
+  const pending=reqs.filter(r=>r.status==='pending'),done=reqs.filter(r=>r.status!=='pending');
+  document.getElementById('rBadge').textContent=pending.length;
+  const info=r=>`<div class="card-meta">${esc(r.email)}${r.telephone?' · '+esc(r.telephone):''} · ${esc(r.statut_pro||'')} · ${esc(r.formule||'')} · le ${new Date(r.created_at).toLocaleDateString('fr-FR')}</div>`;
+  const contact=r=>`<a class="btn btn-outline btn-xs" style="width:auto;text-decoration:none;" href="mailto:${encodeURIComponent(r.email).replace(/%40/g,'@')}">✉ Écrire</a>${r.telephone?`<a class="btn btn-outline btn-xs" style="width:auto;text-decoration:none;" href="tel:${esc(r.telephone)}">📞 Appeler</a>`:''}`;
+  document.getElementById('adhReqList').innerHTML=
+    '<h4 style="font-family:Outfit;font-weight:700;font-size:15px;color:var(--mag);margin-bottom:12px;">⏳ En attente ('+pending.length+')</h4>'+
+    (pending.map(r=>`<div class="card" style="border-left:3px solid var(--mag);"><div class="card-hd"><div><div class="card-title">${esc(r.prenom)} ${esc(r.nom)}</div>${info(r)}</div><span class="badge-s b-pending">En attente</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;"><button class="btn btn-cyan btn-xs" style="width:auto;background:#10B981;" onclick="processAdh('${r.id}',true)">✅ Valider</button><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="processAdh('${r.id}',false)">✕ Décliner</button>${contact(r)}</div></div>`).join('')||'<div style="color:var(--g400);padding:14px;text-align:center;font-size:13px;margin-bottom:18px;">Aucune demande en attente.</div>')+
+    (done.length?'<h4 style="font-family:Outfit;font-weight:700;font-size:15px;color:var(--g500);margin:24px 0 12px;">Historique ('+done.length+')</h4>'+done.map(r=>`<div class="card"><div class="card-hd"><div><div class="card-title">${esc(r.prenom)} ${esc(r.nom)}</div>${info(r)}</div><span class="badge-s ${r.status==='approved'?'b-approved':'b-rejected'}">${r.status==='approved'?'Validée':'Déclinée'}</span></div></div>`).join(''):'');
+}
+async function processAdh(id,approve){
+  if(!confirm(approve?'Valider cette demande ? La personne sera ajoutée à la base adhérents.':'Décliner cette demande ?'))return;
+  const {error}=await sb.rpc('unsa_process_adhesion',{p_id:id,p_approve:approve});
+  if(error){toast('Erreur : '+error.message,'err');return;}
+  toast(approve?'Demande validée : ajoutée à la base adhérents':'Demande déclinée','ok');
+  allMembers=[];loadAdhReqs();
 }
 
 // ═══ FAQ ADMIN ═══
