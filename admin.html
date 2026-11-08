@@ -88,12 +88,11 @@ textarea.input{resize:vertical;min-height:80px;}
 <div class="sb-user"><div class="sb-av" id="sbAv">AH</div><div><div class="sb-un" id="sbName">Admin</div><div class="sb-ur">Administrateur</div></div></div>
 <div class="sb-nav">
 <a class="active" onclick="showP('dash',this)">📊 Dashboard</a>
-<a onclick="showP('questions',this)">💬 Questions <span class="badge" id="qBadge">0</span></a>
-<a onclick="showP('verifs',this)">👥 Adhérents <span class="badge" id="vBadge">0</span></a>
-<a onclick="showP('messages',this)">💬 Messages</a>
+<a onclick="showP('members',this)">📇 Base adhérents <span class="badge" id="mBadge" style="background:var(--cyan);">0</span></a>
+<a onclick="showP('verifs',this)">👥 Comptes du site</a>
 <a onclick="showP('actus',this)">📰 Actualités</a>
+<a onclick="showP('faq',this)">❓ FAQ</a>
 <a onclick="showP('documents',this)">📁 Documents</a>
-<a onclick="showP('sondages',this)">📊 Sondages</a>
 <a onclick="showP('events',this)">📅 Événements</a>
 </div>
 <div class="sb-foot"><button class="btn btn-outline btn-sm" onclick="adminLogout()">Déconnexion</button></div>
@@ -102,16 +101,26 @@ textarea.input{resize:vertical;min-height:80px;}
 <!-- DASHBOARD -->
 <div class="panel active" id="pan-dash">
 <div class="panel-hd"><h2>Dashboard</h2></div>
-<div class="stats-row"><div class="stat-card"><div class="stat-num" style="color:var(--cyan);" id="sTotal">0</div><div class="stat-lbl">Questions</div></div><div class="stat-card"><div class="stat-num" style="color:#F59E0B;" id="sPend">0</div><div class="stat-lbl">En attente</div></div><div class="stat-card"><div class="stat-num" style="color:var(--mag);" id="sVerifs">0</div><div class="stat-lbl">Non vérifiés</div></div><div class="stat-card"><div class="stat-num" style="color:#10B981;" id="sUsers">0</div><div class="stat-lbl">Utilisateurs</div></div></div>
-<h3 style="font-family:'Outfit';font-weight:700;font-size:16px;margin-bottom:14px;">Questions récentes</h3>
+<div class="stats-row"><div class="stat-card"><div class="stat-num" style="color:var(--cyan);" id="sMembers">0</div><div class="stat-lbl">Base adhérents</div></div><div class="stat-card"><div class="stat-num" style="color:#10B981;" id="sAdhAccounts">0</div><div class="stat-lbl">Comptes adhérents</div></div><div class="stat-card"><div class="stat-num" style="color:var(--mag);" id="sAccounts">0</div><div class="stat-lbl">Comptes du site</div></div><div class="stat-card"><div class="stat-num" style="color:#F59E0B;" id="sActus">0</div><div class="stat-lbl">Actualités</div></div></div>
+<h3 style="font-family:'Outfit';font-weight:700;font-size:16px;margin-bottom:14px;">Derniers comptes créés</h3>
 <div id="dashRecent"></div>
 </div>
-<!-- QUESTIONS -->
-<div class="panel" id="pan-questions"><div class="panel-hd"><h2>Questions</h2></div><div id="qList"></div></div>
 <!-- VERIFICATIONS -->
-<div class="panel" id="pan-verifs"><div class="panel-hd"><h2>Gestion des adhérents</h2><p>Vérifiez et validez le statut adhérent des utilisateurs inscrits.</p></div><div id="vList"></div></div>
-<!-- MESSAGES -->
-<div class="panel" id="pan-messages"><div class="panel-hd"><h2>Messages</h2></div><div class="conv-list" id="convList"></div><div class="msg-area" id="msgArea"><div class="msg-a-header" id="msgHeader"></div><div class="msg-a-list" id="msgAList"></div><div class="msg-a-input"><input id="msgAIn" placeholder="Répondre..." onkeydown="if(event.key==='Enter')adminSendMsg()"/><button onclick="adminSendMsg()">➤</button></div></div></div>
+<div class="panel" id="pan-verifs"><div class="panel-hd"><h2>Comptes du site</h2><p>Les comptes dont l'e-mail figure dans la base adhérents sont reconnus automatiquement à la connexion. Vous pouvez aussi valider ou retirer un statut manuellement.</p></div><div id="vList"></div></div>
+<!-- BASE ADHÉRENTS -->
+<div class="panel" id="pan-members"><div class="panel-hd"><h2>Base adhérents</h2><p>Retrouvez, contactez ou répondez à un adhérent. Données confidentielles : accès réservé aux administrateurs.</p></div>
+<div class="card" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+<input class="input" id="mSearch" type="search" placeholder="Rechercher : nom, e-mail, téléphone, collège, unité…" oninput="renderMembers()" style="flex:1;min-width:220px;"/>
+<select class="input" id="mFilterSynd" onchange="renderMembers()" style="width:auto;"><option value="">Tous les syndicats</option></select>
+<select class="input" id="mFilterSit" onchange="renderMembers()" style="width:auto;"><option value="">Toutes situations</option></select>
+<label class="btn btn-outline btn-sm" style="width:auto;margin:0;">📥 Importer un Excel<input type="file" id="mImport" accept=".xlsx,.xls,.csv" style="display:none;" onchange="importMembers(event)"/></label>
+</div>
+<div id="mCount" class="card-meta" style="margin:4px 0 12px;"></div>
+<div id="membersList"></div></div>
+<!-- FAQ ADMIN -->
+<div class="panel" id="pan-faq"><div class="panel-hd"><h2>FAQ</h2><p>Questions fréquentes affichées dans l'onglet FAQ du site.</p></div>
+<div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 id="faqFormTitle" style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Nouvelle question</h4><input type="hidden" id="faqId"/><div class="fg"><label>Question</label><input class="input" id="faqQ"/></div><div class="fg"><label>Réponse</label><textarea class="input" id="faqA" style="min-height:110px;"></textarea></div><div class="fg" style="max-width:180px;"><label>Ordre d'affichage</label><input class="input" type="number" id="faqPos" value="0"/></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="saveFaq()">Enregistrer</button><button class="btn btn-outline btn-sm" style="width:auto;" onclick="resetFaqForm()">Annuler</button></div></div>
+<div id="faqAdminList" style="margin-top:18px;"></div></div>
 <!-- ACTUS -->
 <div class="panel" id="pan-actus">
 <div class="panel-hd"><h2>Actualités</h2></div>
@@ -122,10 +131,6 @@ textarea.input{resize:vertical;min-height:80px;}
 <div class="panel" id="pan-documents"><div class="panel-hd"><h2>Documents & Tracts</h2></div>
 <div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Ajouter un document</h4><div class="form-row"><div class="fg"><label>Titre</label><input class="input" id="nDocTitle"/></div><div class="fg"><label>Catégorie</label><select class="input" id="nDocCat"><option>Accord</option><option>Tract</option><option>PV</option><option>Formation</option><option>Juridique</option><option>Journal trimestriel</option><option>Général</option></select></div></div><div class="fg"><label>Description (optionnel)</label><input class="input" id="nDocDesc"/></div><div class="form-row"><div class="fg"><label>Fichier</label><input class="input" type="file" id="nDocFile" style="padding:8px;"/></div><div class="fg"><label>Accès</label><select class="input" id="nDocAccess"><option value="false">Tous les utilisateurs</option><option value="true">Adhérents uniquement</option></select></div></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addDoc()">Publier</button></div>
 <div id="adminDocsList" style="margin-top:18px;"></div></div>
-<!-- SONDAGES ADMIN -->
-<div class="panel" id="pan-sondages"><div class="panel-hd"><h2>Sondages & Votes</h2></div>
-<div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Créer un sondage</h4><div class="fg"><label>Question</label><input class="input" id="nPollTitle" placeholder="Ex: Êtes-vous favorable à..."/></div><div class="fg"><label>Description (optionnel)</label><input class="input" id="nPollDesc"/></div><div class="fg"><label>Options (une par ligne)</label><textarea class="input" id="nPollOpts" placeholder="Oui&#10;Non&#10;Sans avis" style="min-height:80px;"></textarea></div><div class="form-row"><div class="fg"><label>Date de fin (optionnel)</label><input class="input" type="date" id="nPollEnd"/></div><div class="fg"><label>Accès</label><select class="input" id="nPollAccess"><option value="true">Adhérents uniquement</option><option value="false">Tous</option></select></div></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addPoll()">Créer le sondage</button></div>
-<div id="adminPollsList" style="margin-top:18px;"></div></div>
 <!-- ÉVÉNEMENTS ADMIN -->
 <div class="panel" id="pan-events"><div class="panel-hd"><h2>Événements</h2></div>
 <div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Ajouter un événement</h4><div class="form-row"><div class="fg"><label>Titre</label><input class="input" id="nEvTitle"/></div><div class="fg"><label>Catégorie</label><select class="input" id="nEvCat"><option>Réunion</option><option>AG</option><option>Permanence</option><option>Formation</option><option>Date clé IEG</option><option>Autre</option></select></div></div><div class="form-row"><div class="fg"><label>Date</label><input class="input" type="date" id="nEvDate"/></div><div class="fg"><label>Heure</label><input class="input" type="time" id="nEvTime"/></div></div><div class="form-row"><div class="fg"><label>Lieu</label><input class="input" id="nEvLoc" placeholder="Salle X, Bâtiment Y..."/></div><div class="fg"><label>Accès</label><select class="input" id="nEvAccess"><option value="false">Tous</option><option value="true">Adhérents uniquement</option></select></div></div><div class="fg"><label>Description (optionnel)</label><textarea class="input" id="nEvDesc" style="min-height:60px;"></textarea></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addEvent()">Publier</button></div>
@@ -170,7 +175,7 @@ async function adminLogin(){
   loadDash();
 }
 async function adminLogout(){await sb.auth.signOut();location.reload();}
-function showP(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('pan-'+id).classList.add('active');document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');if(id==='dash')loadDash();if(id==='questions')loadQs();if(id==='verifs')loadVerifs();if(id==='messages')loadConvs();if(id==='actus')loadActus();if(id==='documents')loadAdminDocs();if(id==='sondages')loadAdminPolls();if(id==='events')loadAdminEvents();}
+function showP(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('pan-'+id).classList.add('active');document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');if(id==='dash')loadDash();if(id==='members')loadMembers();if(id==='verifs')loadVerifs();if(id==='actus')loadActus();if(id==='faq')loadFaqAdmin();if(id==='documents')loadAdminDocs();if(id==='events')loadAdminEvents();}
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 fillRegionSelects();
 
@@ -183,66 +188,109 @@ async function loadAllProfiles(){
 }
 
 async function loadDash(){
+  const cnt=q=>q.then(r=>r.count||0);
+  const [m,acc,adh,act]=await Promise.all([
+    cnt(sb.from('unsa_members').select('*',{count:'exact',head:true})),
+    cnt(sb.from('unsa_profiles').select('*',{count:'exact',head:true})),
+    cnt(sb.from('unsa_profiles').select('*',{count:'exact',head:true}).eq('adherent_verified',true)),
+    cnt(sb.from('unsa_actus').select('*',{count:'exact',head:true}))
+  ]);
+  document.getElementById('sMembers').textContent=m;
+  document.getElementById('sAccounts').textContent=acc;
+  document.getElementById('sAdhAccounts').textContent=adh;
+  document.getElementById('sActus').textContent=act;
+  document.getElementById('mBadge').textContent=m;
+  const {data:recent}=await sb.from('unsa_profiles').select('prenom,nom,email,adherent_verified,created_at').order('created_at',{ascending:false}).limit(5);
+  document.getElementById('dashRecent').innerHTML=(recent||[]).map(u=>`<div class="card"><div class="card-hd"><div><div class="card-title">${esc(u.prenom||'')} ${esc(u.nom||'')}</div><div class="card-meta">${esc(u.email||'')} · ${new Date(u.created_at).toLocaleDateString('fr-FR')}</div></div><span class="badge-s ${u.adherent_verified?'b-approved':'b-pending'}">${u.adherent_verified?'Adhérent':'Non adhérent'}</span></div></div>`).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucun compte.</div>';
+}
+
+// ═══ BASE ADHÉRENTS ═══
+let allMembers=[];
+function fmtPhone(v){let d=String(v||'').replace(/\D/g,'');if(d.length===9)d='0'+d;if(d.length===11&&d.startsWith('33'))d='0'+d.slice(2);return d;}
+function prettyPhone(d){return (d||'').replace(/(\d{2})(?=\d)/g,'$1 ');}
+function fillSelect(id,values,allLabel){const s=document.getElementById(id);const cur=s.value;s.innerHTML='<option value="">'+allLabel+'</option>'+values.map(v=>`<option>${esc(v)}</option>`).join('');s.value=values.includes(cur)?cur:'';}
+async function loadMembers(){
   await loadAllProfiles();
-  const {count:total}=await sb.from('unsa_questions').select('*',{count:'exact',head:true});
-  const {count:pend}=await sb.from('unsa_questions').select('*',{count:'exact',head:true}).eq('status','pending');
-  const {count:nonVerified}=await sb.from('unsa_profiles').select('*',{count:'exact',head:true}).eq('adherent_verified',false).eq('role','user');
-  const {count:users}=await sb.from('unsa_profiles').select('*',{count:'exact',head:true});
-  document.getElementById('sTotal').textContent=total||0;
-  document.getElementById('sPend').textContent=pend||0;
-  document.getElementById('sVerifs').textContent=nonVerified||0;
-  document.getElementById('sUsers').textContent=users||0;
-  document.getElementById('qBadge').textContent=pend||0;
-  document.getElementById('vBadge').textContent=nonVerified||0;
-  const {data:recent}=await sb.from('unsa_questions').select('*').order('created_at',{ascending:false}).limit(5);
-  document.getElementById('dashRecent').innerHTML=(recent||[]).map(q=>renderQCard(q)).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune question.</div>';
+  const {data,error}=await sb.from('unsa_members').select('*').order('nom_complet',{ascending:true});
+  if(error){toast('Erreur : '+error.message,'err');return;}
+  allMembers=data||[];
+  document.getElementById('mBadge').textContent=allMembers.length;
+  fillSelect('mFilterSynd',[...new Set(allMembers.map(m=>m.syndicat).filter(Boolean))].sort(),'Tous les syndicats');
+  fillSelect('mFilterSit',[...new Set(allMembers.map(m=>m.situation).filter(Boolean))].sort(),'Toutes situations');
+  renderMembers();
+}
+function renderMembers(){
+  const q=document.getElementById('mSearch').value.trim().toLowerCase();
+  const synd=document.getElementById('mFilterSynd').value,sit=document.getElementById('mFilterSit').value;
+  const qDigits=q.replace(/\D/g,'');
+  const accountEmails=new Set(Object.values(profilesCache).map(p=>(p.email||'').toLowerCase()));
+  const list=allMembers.filter(m=>(!synd||m.syndicat===synd)&&(!sit||m.situation===sit)&&(!q||[m.nom_complet,m.email,m.college,m.unite_irp,m.syndicat,m.situation].some(v=>(v||'').toLowerCase().includes(q))||(qDigits.length>=3&&(m.portable||'').includes(qDigits))));
+  document.getElementById('mCount').textContent=list.length+' adhérent'+(list.length>1?'s':'')+(list.length!==allMembers.length?' sur '+allMembers.length:'');
+  document.getElementById('membersList').innerHTML=list.map(m=>{
+    const hasAcc=m.email&&accountEmails.has(m.email.toLowerCase());
+    return `<div class="card"><div class="card-hd"><div><div class="card-title">${esc(m.nom_complet)} ${m.situation?'<span class="badge-s" style="background:var(--g100);color:var(--g600);margin-left:6px;">'+esc(m.situation)+'</span>':''}</div><div class="card-meta">${[m.syndicat,m.unite_irp,m.college,m.fonction].filter(Boolean).map(esc).join(' · ')}</div></div>${hasAcc?'<span class="badge-s b-approved">Compte créé</span>':''}</div><div style="display:flex;gap:8px;flex-wrap:wrap;">${m.email?`<a class="btn btn-cyan btn-xs" style="width:auto;text-decoration:none;" href="mailto:${encodeURIComponent(m.email).replace(/%40/g,'@')}">✉ ${esc(m.email)}</a>`:''}${m.portable?`<a class="btn btn-outline btn-xs" style="width:auto;text-decoration:none;" href="tel:${esc(m.portable)}">📞 ${esc(prettyPhone(m.portable))}</a>`:''}</div></div>`;
+  }).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">'+(allMembers.length?'Aucun résultat.':'Base vide : importez le fichier Excel des adhérents.')+'</div>';
+}
+// Chargement à la demande de SheetJS (lecture des fichiers Excel)
+function loadSheetJS(){return window.XLSX?Promise.resolve():new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';s.onload=res;s.onerror=()=>rej(new Error('Impossible de charger le lecteur Excel'));document.head.appendChild(s);});}
+async function importMembers(ev){
+  const file=ev.target.files[0];ev.target.value='';if(!file)return;
+  try{
+    await loadSheetJS();
+    const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:false});
+    const norm=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z]/g,'');
+    const pick=(r,keys)=>{for(const k of Object.keys(r)){if(keys.includes(norm(k)))return String(r[k]).trim();}return'';};
+    const recs=rows.map(r=>({
+      nom_complet:pick(r,['adherents','adherent','nom','nomcomplet','nomprenom']),
+      college:pick(r,['college'])||null,unite_irp:pick(r,['uniteirp','unite'])||null,fonction:pick(r,['fonction'])||null,
+      situation:pick(r,['situationsyndicale','situation'])||null,syndicat:pick(r,['syndicat'])||null,
+      portable:fmtPhone(pick(r,['portable','telephone','tel','mobile']))||null,email:pick(r,['email','mail','courriel','adressemail'])||null
+    })).filter(r=>r.nom_complet);
+    if(!recs.length){toast('Aucune ligne reconnue (colonne « Adhérents » attendue)','err');return;}
+    if(!confirm(`Remplacer la base actuelle (${allMembers.length} adhérents) par les ${recs.length} adhérents du fichier « ${file.name} » ?`))return;
+    // Insertion d'abord, suppression de l'ancienne base ensuite : rien n'est perdu si l'import échoue
+    const {data:old,error:oldErr}=await sb.from('unsa_members').select('id');if(oldErr)throw oldErr;
+    for(let i=0;i<recs.length;i+=500){const {error}=await sb.from('unsa_members').insert(recs.slice(i,i+500));if(error)throw error;}
+    const oldIds=(old||[]).map(o=>o.id);
+    for(let i=0;i<oldIds.length;i+=200){const {error}=await sb.from('unsa_members').delete().in('id',oldIds.slice(i,i+200));if(error)throw error;}
+    toast(recs.length+' adhérents importés','ok');loadMembers();
+  }catch(e){toast('Erreur import : '+(e.message||e),'err');}
 }
 
-async function loadQs(){
-  await loadAllProfiles();
-  const {data}=await sb.from('unsa_questions').select('*').order('created_at',{ascending:false});
-  document.getElementById('qList').innerHTML=(data||[]).map(q=>renderQCard(q,true)).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune question.</div>';
+// ═══ FAQ ADMIN ═══
+let adminFaq=[];
+async function loadFaqAdmin(){
+  const {data,error}=await sb.from('unsa_faq').select('*').order('position',{ascending:true}).order('created_at',{ascending:true});
+  if(error){toast('Erreur : '+error.message,'err');return;}
+  adminFaq=data||[];
+  document.getElementById('faqAdminList').innerHTML=adminFaq.map((f,i)=>`<div class="card"><div class="card-hd"><div><div class="card-title">${esc(f.question)}</div><div class="card-meta">Ordre : ${f.position}</div></div><div style="display:flex;gap:6px;"><button class="btn btn-outline btn-xs" style="width:auto;" onclick="editFaq(${i})">Modifier</button><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);" onclick="delFaq('${f.id}')">Supprimer</button></div></div><div class="card-body" style="white-space:pre-line;">${esc(f.answer)}</div></div>`).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune question pour le moment.</div>';
 }
-
-function renderQCard(q,full){
-  const p=profilesCache[q.user_id]||{};
-  const name=((p.prenom||'')+ ' '+(p.nom||'')).trim()||'Utilisateur';
-  const cls=q.status==='answered'?'b-answered':'b-pending';
-  const txt=q.status==='answered'?'Répondue':'En attente';
-  const attachHTML=q.response_attachment_url?`<div style="margin-top:6px;"><a href="${esc(q.response_attachment_url)}" target="_blank" style="font-size:12px;color:var(--cyan);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">📎 ${esc(q.response_attachment_name||'Pièce jointe')}</a></div>`:'';
-  return `<div class="card"><div class="card-hd"><div><div class="card-title">${esc(q.theme)} — ${esc(name)}</div><div class="card-meta">${esc(p.email||'')} · ${esc(p.metier||'')}</div></div><span class="badge-s ${cls}">${txt}</span></div><div class="card-body">${esc(q.question_text)}</div>${full?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--g100);">${q.response?`<div style="background:var(--g50);padding:12px;border-radius:var(--r-sm);font-size:13px;margin-bottom:8px;">💬 ${esc(q.response)}${attachHTML}</div>`:``}<textarea class="input" id="resp-${q.id}" placeholder="Votre réponse..." style="min-height:60px;">${q.response||''}</textarea><div style="margin-top:6px;"><label style="font-family:'Outfit';font-weight:600;font-size:11px;color:var(--g500);text-transform:uppercase;">📎 Pièce jointe (optionnel)</label><input type="file" id="attach-${q.id}" class="input" style="padding:8px;margin-top:4px;"/></div><button class="btn btn-cyan btn-sm" style="width:auto;margin-top:8px;" onclick="respondQ('${q.id}')">${q.response?'Modifier':'Répondre'}</button></div>`:''}</div>`;
+function resetFaqForm(){document.getElementById('faqId').value='';document.getElementById('faqQ').value='';document.getElementById('faqA').value='';document.getElementById('faqPos').value=adminFaq.length;document.getElementById('faqFormTitle').textContent='Nouvelle question';}
+function editFaq(i){const f=adminFaq[i];if(!f)return;document.getElementById('faqId').value=f.id;document.getElementById('faqQ').value=f.question;document.getElementById('faqA').value=f.answer;document.getElementById('faqPos').value=f.position;document.getElementById('faqFormTitle').textContent='Modifier la question';document.getElementById('pan-faq').scrollIntoView({behavior:'smooth'});}
+async function saveFaq(){
+  const id=document.getElementById('faqId').value;
+  const rec={question:document.getElementById('faqQ').value.trim(),answer:document.getElementById('faqA').value.trim(),position:parseInt(document.getElementById('faqPos').value,10)||0};
+  if(!rec.question||!rec.answer){toast('Question et réponse requises','err');return;}
+  const {error}=id?await sb.from('unsa_faq').update(rec).eq('id',id):await sb.from('unsa_faq').insert(rec);
+  if(error){toast('Erreur : '+error.message,'err');return;}
+  toast(id?'Question modifiée':'Question ajoutée','ok');resetFaqForm();loadFaqAdmin();
 }
-
-async function respondQ(qId){
-  const txt=document.getElementById('resp-'+qId).value.trim();
-  if(!txt)return;
-  let attachment_url=null,attachment_name=null;
-  const fileInput=document.getElementById('attach-'+qId);
-  if(fileInput&&fileInput.files&&fileInput.files[0]){
-    const file=fileInput.files[0];
-    const path='q_'+qId+'_'+Date.now()+'_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'');
-    const {error:upErr}=await sb.storage.from('question-attachments').upload(path,file);
-    if(!upErr){const {data:{publicUrl}}=sb.storage.from('question-attachments').getPublicUrl(path);attachment_url=publicUrl;attachment_name=file.name;}
-  }
-  const update={response:txt,status:'answered',responded_by:adminUser.id,responded_at:new Date().toISOString()};
-  if(attachment_url){update.response_attachment_url=attachment_url;update.response_attachment_name=attachment_name;}
-  await sb.from('unsa_questions').update(update).eq('id',qId);
-  // Push notification to question author
-  const {data:q}=await sb.from('unsa_questions').select('user_id,theme').eq('id',qId).single();
-  if(q)sendPush('Réponse à votre question','Votre question sur "'+q.theme+'" a reçu une réponse.',[q.user_id]);
-  loadQs();loadDash();
-}
+async function delFaq(id){if(!confirm('Supprimer cette question ?'))return;const {error}=await sb.from('unsa_faq').delete().eq('id',id);if(error){toast('Erreur : '+error.message,'err');return;}loadFaqAdmin();}
 
 async function loadVerifs(){
   const {data}=await sb.from('unsa_profiles').select('*').order('created_at',{ascending:false});
+  if(!allMembers.length){const {data:mm}=await sb.from('unsa_members').select('email_norm');allMembers=(mm||[]).map(m=>({email:m.email_norm}));}
+  const inBase=new Set(allMembers.map(m=>(m.email||'').toLowerCase()));
+  const baseTag=u=>inBase.has((u.email||'').toLowerCase())?' · 📇 Dans la base':' · Hors base';
   const users=data||[];
   const nonVerified=users.filter(u=>!u.adherent_verified&&u.role==='user');
   const verified=users.filter(u=>u.adherent_verified);
   document.getElementById('vList').innerHTML=
     (nonVerified.length>0?'<h4 style="font-family:Outfit;font-weight:700;font-size:15px;color:var(--mag);margin-bottom:12px;">⏳ En attente de vérification ('+nonVerified.length+')</h4>'+
-    nonVerified.map(u=>`<div class="card" style="border-left:3px solid var(--mag);"><div class="card-hd"><div><div class="card-title">${esc(u.prenom||'')} ${esc(u.nom||'')}</div><div class="card-meta">${esc(u.email)} · ${esc(u.metier||'—')} · Inscrit le ${new Date(u.created_at).toLocaleDateString('fr-FR')}</div></div><span class="badge-s b-pending">Non vérifié</span></div><div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-cyan btn-xs" style="width:auto;background:#10B981;" onclick="toggleAdherent('${u.id}',true)">✅ Valider comme adhérent</button></div></div>`).join(''):'<div style="color:var(--g400);padding:14px;text-align:center;font-size:13px;margin-bottom:18px;">Aucun utilisateur en attente.</div>')+
+    nonVerified.map(u=>`<div class="card" style="border-left:3px solid var(--mag);"><div class="card-hd"><div><div class="card-title">${esc(u.prenom||'')} ${esc(u.nom||'')}</div><div class="card-meta">${esc(u.email)} · ${esc(u.metier||'—')} · Inscrit le ${new Date(u.created_at).toLocaleDateString('fr-FR')}${baseTag(u)}</div></div><span class="badge-s b-pending">Non vérifié</span></div><div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-cyan btn-xs" style="width:auto;background:#10B981;" onclick="toggleAdherent('${u.id}',true)">✅ Valider comme adhérent</button></div></div>`).join(''):'<div style="color:var(--g400);padding:14px;text-align:center;font-size:13px;margin-bottom:18px;">Aucun utilisateur en attente.</div>')+
     '<h4 style="font-family:Outfit;font-weight:700;font-size:15px;color:#10B981;margin:24px 0 12px;">✅ Adhérents vérifiés ('+verified.length+')</h4>'+
-    (verified.length>0?verified.map(u=>`<div class="card" style="border-left:3px solid #10B981;"><div class="card-hd"><div><div class="card-title">${esc(u.prenom||'')} ${esc(u.nom||'')}</div><div class="card-meta">${esc(u.email)} · ${esc(u.metier||'—')}${u.numero_adherent?' · N° '+esc(u.numero_adherent):''}</div></div><span class="badge-s b-approved">Adhérent</span></div><div style="margin-top:8px;"><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="toggleAdherent('${u.id}',false)">Retirer le statut adhérent</button></div></div>`).join(''):'<div style="color:var(--g400);padding:14px;text-align:center;font-size:13px;">Aucun adhérent vérifié.</div>');
+    (verified.length>0?verified.map(u=>`<div class="card" style="border-left:3px solid #10B981;"><div class="card-hd"><div><div class="card-title">${esc(u.prenom||'')} ${esc(u.nom||'')}</div><div class="card-meta">${esc(u.email)} · ${esc(u.metier||'—')}${u.numero_adherent?' · N° '+esc(u.numero_adherent):''}${baseTag(u)}</div></div><span class="badge-s b-approved">Adhérent</span></div><div style="margin-top:8px;"><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="toggleAdherent('${u.id}',false)">Retirer le statut adhérent</button></div></div>`).join(''):'<div style="color:var(--g400);padding:14px;text-align:center;font-size:13px;">Aucun adhérent vérifié.</div>');
 }
 
 async function toggleAdherent(userId,approve){
@@ -250,55 +298,6 @@ async function toggleAdherent(userId,approve){
   await sb.from('unsa_profiles').update({is_adherent:approve,adherent_verified:approve}).eq('id',userId);
   if(approve)sendPush('Statut adhérent validé ✅','Votre compte a été vérifié. Vous avez maintenant accès à toutes les fonctionnalités.',[userId]);
   loadVerifs();loadDash();
-}
-
-// MESSAGES ADMIN
-async function loadConvs(){
-  await loadAllProfiles();
-  const {data}=await sb.from('unsa_conversations').select('*').order('last_message_at',{ascending:false});
-  document.getElementById('convList').innerHTML=(data||[]).map(c=>{
-    const p=profilesCache[c.user_id]||{};const name=((p.prenom||'')+' '+(p.nom||'')).trim()||'Utilisateur';
-    const time=c.last_message_at?new Date(c.last_message_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
-    return `<div class="conv-item${activeConvId===c.id?' active':''}" onclick="openConv('${c.id}','${esc(name)}')"><div class="conv-av">${(p.prenom||'?')[0].toUpperCase()}</div><div class="conv-info"><div class="conv-name">${esc(name)}</div><div class="conv-preview">${esc(c.subject||'')}</div></div><div class="conv-time">${time}</div></div>`;
-  }).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;font-size:13px;">Aucune conversation.</div>';
-}
-
-async function openConv(cId,name){
-  activeConvId=cId;
-  document.getElementById('msgArea').classList.add('show');
-  document.getElementById('msgHeader').textContent='💬 '+name;
-  document.querySelectorAll('.conv-item').forEach(c=>c.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-  await loadAdminMsgs();
-  // Subscribe
-  if(adminMsgChannel)adminMsgChannel.unsubscribe();
-  adminMsgChannel=sb.channel('admin-msgs-'+cId).on('postgres_changes',{event:'*',schema:'public',table:'unsa_messages',filter:'conversation_id=eq.'+cId},()=>loadAdminMsgs()).subscribe();
-  // Mark as delivered
-  await sb.from('unsa_messages').update({status:'delivered'}).eq('conversation_id',cId).neq('sender_id',adminUser.id).eq('status','sent');
-}
-
-async function loadAdminMsgs(){
-  if(!activeConvId)return;
-  const {data}=await sb.from('unsa_messages').select('*').eq('conversation_id',activeConvId).order('created_at',{ascending:true});
-  const list=document.getElementById('msgAList');
-  list.innerHTML=(data||[]).map(m=>{
-    const mine=m.sender_id===adminUser.id;
-    const time=new Date(m.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-    const si=m.status==='read'?'✓✓':m.status==='delivered'?'✓✓':'✓';
-    const sc=m.status==='read'?'color:#10B981':m.status==='delivered'?'color:var(--cyan)':'color:var(--g400)';
-    return `<div class="msg-bubble ${mine?'msg-mine':'msg-theirs'}">${esc(m.content)}<div class="msg-meta"><span class="msg-time">${time}</span>${mine?`<span style="font-size:10px;${sc}">${si}</span>`:''}</div></div>`;
-  }).join('');
-  list.scrollTop=list.scrollHeight;
-  // Mark received msgs as read
-  await sb.from('unsa_messages').update({status:'read'}).eq('conversation_id',activeConvId).neq('sender_id',adminUser.id).neq('status','read');
-}
-
-async function adminSendMsg(){
-  const input=document.getElementById('msgAIn');
-  const txt=input.value.trim();if(!txt||!activeConvId)return;input.value='';
-  await sb.from('unsa_messages').insert({conversation_id:activeConvId,sender_id:adminUser.id,content:txt,status:'sent'});
-  await sb.from('unsa_conversations').update({last_message_at:new Date().toISOString(),admin_id:adminUser.id}).eq('id',activeConvId);
-  loadAdminMsgs();
 }
 
 let adminActus=[],lastActuTitle='';
@@ -369,34 +368,6 @@ async function loadAdminDocs(){
   document.getElementById('adminDocsList').innerHTML=(data||[]).map(d=>`<div class="card"><div class="card-hd"><div><div class="card-title">📄 ${esc(d.title)}</div><div class="card-meta">${esc(d.category)} · ${d.adherent_only?'🔒 Adhérents':'🌐 Tous'} · ${new Date(d.created_at).toLocaleDateString('fr-FR')}</div></div><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);" onclick="delDoc('${d.id}')">Supprimer</button></div>${d.description?'<div class="card-body">'+esc(d.description)+'</div>':''}</div>`).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;">Aucun document.</div>';
 }
 async function delDoc(id){if(!confirm('Supprimer ce document ?'))return;await sb.from('unsa_documents').delete().eq('id',id);loadAdminDocs();}
-
-// ═══ SONDAGES ADMIN ═══
-async function addPoll(){
-  const title=document.getElementById('nPollTitle').value.trim();
-  const opts=document.getElementById('nPollOpts').value.split('\n').map(o=>o.trim()).filter(o=>o);
-  if(!title||opts.length<2){toast('Question et au moins 2 options requises','err');return;}
-  const endVal=document.getElementById('nPollEnd').value;
-  await sb.from('unsa_polls').insert({
-    title,description:document.getElementById('nPollDesc').value.trim()||null,
-    options:opts,adherent_only:document.getElementById('nPollAccess').value==='true',
-    ends_at:endVal?new Date(endVal+'T23:59:59').toISOString():null,
-    created_by:adminUser.id
-  });
-  document.getElementById('nPollTitle').value='';document.getElementById('nPollDesc').value='';document.getElementById('nPollOpts').value='';document.getElementById('nPollEnd').value='';
-  toast('Sondage créé','ok');sendPush('📊 Nouveau sondage',title);loadAdminPolls();
-}
-async function loadAdminPolls(){
-  const {data:polls}=await sb.from('unsa_polls').select('*').order('created_at',{ascending:false});
-  const {data:votes}=await sb.from('unsa_votes').select('poll_id,option_index');
-  document.getElementById('adminPollsList').innerHTML=(polls||[]).map(p=>{
-    const pv=(votes||[]).filter(v=>v.poll_id===p.id);
-    const total=new Set(pv.map(v=>v.user_id)).size;
-    const optsHTML=(p.options||[]).map((o,i)=>{const c=pv.filter(v=>v.option_index===i).length;return esc(o)+' ('+c+')';}).join(' · ');
-    return `<div class="card"><div class="card-hd"><div><div class="card-title">${esc(p.title)} <span style="font-size:12px;color:${p.active?'#10B981':'var(--g400)'};">${p.active?'● Actif':'● Fermé'}</span></div><div class="card-meta">${total} vote(s) · ${optsHTML}</div></div><div style="display:flex;gap:6px;"><button class="btn btn-outline btn-xs" style="width:auto;" onclick="togglePoll('${p.id}',${!p.active})">${p.active?'Fermer':'Rouvrir'}</button><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);" onclick="delPoll('${p.id}')">Supprimer</button></div></div></div>`;
-  }).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;">Aucun sondage.</div>';
-}
-async function togglePoll(id,active){await sb.from('unsa_polls').update({active}).eq('id',id);loadAdminPolls();}
-async function delPoll(id){if(!confirm('Supprimer ce sondage et ses votes ?'))return;await sb.from('unsa_polls').delete().eq('id',id);loadAdminPolls();}
 
 // ═══ ÉVÉNEMENTS ADMIN ═══
 async function addEvent(){
