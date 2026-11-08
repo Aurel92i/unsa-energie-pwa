@@ -1,7 +1,7 @@
 {
-  "name": "UNSA Énergie — Ille et Armor",
-  "short_name": "UNSA Énergie",
-  "description": "Syndicat UNSA Énergie — Agence Ille et Armor",
+  "name": "UNSA Énergies",
+  "short_name": "UNSA Énergies",
+  "description": "UNSA Énergies — Site national",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#04B3DE",

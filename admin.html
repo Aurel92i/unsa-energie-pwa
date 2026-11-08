@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>UNSA Admin</title>
+<title>UNSA Énergies — Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -72,7 +72,7 @@ textarea.input{resize:vertical;min-height:80px;}
 <body>
 <div class="login-wrap" id="loginWrap">
 <div class="login-card">
-<h2>Administration</h2><div class="sub">UNSA Énergie — Ille et Armor</div>
+<h2>Administration</h2><div class="sub">UNSA Énergies — Site national</div>
 <form onsubmit="adminLogin(); return false;">
 <div class="fg"><label>Email</label><input class="input" id="lEmail" type="email" value="aurelien.herbin@grdf.fr"/></div>
 <div class="fg"><label>Mot de passe</label><input class="input" id="lPwd" type="password"/></div>
@@ -84,7 +84,7 @@ textarea.input{resize:vertical;min-height:80px;}
 </div>
 <div class="admin-wrap" id="adminWrap">
 <div class="sidebar">
-<div class="sb-brand"><h3>UNSA Admin</h3><span>Ille et Armor</span></div>
+<div class="sb-brand"><h3>UNSA Énergies</h3><span>Administration — Site national</span></div>
 <div class="sb-user"><div class="sb-av" id="sbAv">AH</div><div><div class="sb-un" id="sbName">Admin</div><div class="sb-ur">Administrateur</div></div></div>
 <div class="sb-nav">
 <a class="active" onclick="showP('dash',this)">📊 Dashboard</a>
@@ -115,12 +115,12 @@ textarea.input{resize:vertical;min-height:80px;}
 <!-- ACTUS -->
 <div class="panel" id="pan-actus">
 <div class="panel-hd"><h2>Actualités</h2></div>
-<div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Nouvelle actualité</h4><div class="fg"><label>Titre</label><input class="input" id="nActuTitle"/></div><div class="fg"><label>Contenu</label><textarea class="input" id="nActuText"></textarea></div><div class="form-row"><div class="fg"><label>Tag</label><input class="input" id="nActuTag" placeholder="Salaires, Télétravail..."/></div><div class="fg"><label>Image (optionnel)</label><input class="input" id="nActuImg" type="file" accept="image/*" style="padding:8px;"/></div></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addActu()">Publier</button></div>
+<div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Nouvelle actualité</h4><div class="fg"><label>Titre</label><input class="input" id="nActuTitle"/></div><div class="fg"><label>Contenu</label><textarea class="input" id="nActuText"></textarea></div><div class="form-row"><div class="fg"><label>Tag</label><input class="input" id="nActuTag" placeholder="Salaires, Télétravail..."/></div><div class="fg"><label>Image (optionnel)</label><input class="input" id="nActuImg" type="file" accept="image/*" style="padding:8px;"/></div></div><div class="fg"><label>Région</label><select class="input region-select" id="nActuRegion"><option value="">— National (toutes régions) —</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addActu()">Publier</button><button class="btn btn-outline btn-sm" style="width:auto;" onclick="notifyActu()" title="Envoie une notification push à tous les abonnés">📢 Notifier les abonnés</button></div></div>
 <div id="actusList" style="margin-top:18px;"></div>
 </div>
 <!-- DOCUMENTS ADMIN -->
 <div class="panel" id="pan-documents"><div class="panel-hd"><h2>Documents & Tracts</h2></div>
-<div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Ajouter un document</h4><div class="form-row"><div class="fg"><label>Titre</label><input class="input" id="nDocTitle"/></div><div class="fg"><label>Catégorie</label><select class="input" id="nDocCat"><option>Accord</option><option>Tract</option><option>PV</option><option>Formation</option><option>Juridique</option><option>Général</option></select></div></div><div class="fg"><label>Description (optionnel)</label><input class="input" id="nDocDesc"/></div><div class="form-row"><div class="fg"><label>Fichier</label><input class="input" type="file" id="nDocFile" style="padding:8px;"/></div><div class="fg"><label>Accès</label><select class="input" id="nDocAccess"><option value="false">Tous les utilisateurs</option><option value="true">Adhérents uniquement</option></select></div></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addDoc()">Publier</button></div>
+<div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Ajouter un document</h4><div class="form-row"><div class="fg"><label>Titre</label><input class="input" id="nDocTitle"/></div><div class="fg"><label>Catégorie</label><select class="input" id="nDocCat"><option>Accord</option><option>Tract</option><option>PV</option><option>Formation</option><option>Juridique</option><option>Journal trimestriel</option><option>Général</option></select></div></div><div class="fg"><label>Description (optionnel)</label><input class="input" id="nDocDesc"/></div><div class="form-row"><div class="fg"><label>Fichier</label><input class="input" type="file" id="nDocFile" style="padding:8px;"/></div><div class="fg"><label>Accès</label><select class="input" id="nDocAccess"><option value="false">Tous les utilisateurs</option><option value="true">Adhérents uniquement</option></select></div></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addDoc()">Publier</button></div>
 <div id="adminDocsList" style="margin-top:18px;"></div></div>
 <!-- SONDAGES ADMIN -->
 <div class="panel" id="pan-sondages"><div class="panel-hd"><h2>Sondages & Votes</h2></div>
@@ -141,13 +141,18 @@ const PUSH_URL='https://aiafvjhiprdldtwmktur.supabase.co/functions/v1/send-push'
 
 async function sendPush(title,body,userIds,url){
   try{
-    await fetch(PUSH_URL,{
+    const r=await fetch(PUSH_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({title,body,user_ids:userIds||null,url:url||'https://aurel92i.github.io/unsa-energie-pwa/'})
     });
-  }catch(e){console.log('Push send error',e);}
+    return r.ok;
+  }catch(e){console.log('Push send error',e);return false;}
 }
+
+const REGIONS=["Auvergne-Rhône-Alpes", "Bourgogne-Franche-Comté", "Bretagne", "Centre-Val de Loire", "Corse", "Grand Est", "Hauts-de-France", "Île-de-France", "Normandie", "Nouvelle-Aquitaine", "Occitanie", "Pays de la Loire", "Provence-Alpes-Côte d'Azur", "Guadeloupe", "Guyane", "Martinique", "Mayotte", "La Réunion"];
+function regionOptions(sel){return '<option value="">National</option>'+REGIONS.map(r=>`<option${r===sel?' selected':''}>${esc(r)}</option>`).join('');}
+function fillRegionSelects(){document.querySelectorAll('select.region-select').forEach(s=>{REGIONS.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;s.appendChild(o);});});}
 
 async function adminLogin(){
   const email=document.getElementById('lEmail').value.trim();
@@ -167,6 +172,7 @@ async function adminLogin(){
 async function adminLogout(){await sb.auth.signOut();location.reload();}
 function showP(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('pan-'+id).classList.add('active');document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');if(id==='dash')loadDash();if(id==='questions')loadQs();if(id==='verifs')loadVerifs();if(id==='messages')loadConvs();if(id==='actus')loadActus();if(id==='documents')loadAdminDocs();if(id==='sondages')loadAdminPolls();if(id==='events')loadAdminEvents();}
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+fillRegionSelects();
 
 // Cache profiles for merging
 let profilesCache={};
@@ -295,14 +301,17 @@ async function adminSendMsg(){
   loadAdminMsgs();
 }
 
+let adminActus=[],lastActuTitle='';
 async function loadActus(){
   const {data}=await sb.from('unsa_actus').select('*').order('created_at',{ascending:false});
-  document.getElementById('actusList').innerHTML=(data||[]).map(a=>`<div class="card"><div class="card-hd"><div style="display:flex;align-items:center;gap:12px;">${a.image_url?'<img src="'+a.image_url+'" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;"/>':''}<div><div class="card-title">${esc(a.title)}</div><div class="card-meta">${new Date(a.created_at).toLocaleDateString('fr-FR')} · ${esc(a.tag||'')}</div></div></div><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);" onclick="delActu('${a.id}')">Supprimer</button></div><div class="card-body">${esc(a.content)}</div></div>`).join('');
+  adminActus=data||[];
+  document.getElementById('actusList').innerHTML=adminActus.map((a,i)=>`<div class="card"><div class="card-hd"><div style="display:flex;align-items:center;gap:12px;">${a.image_url?'<img src="'+a.image_url+'" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;"/>':''}<div><div class="card-title">${esc(a.title)}</div><div class="card-meta">${new Date(a.created_at).toLocaleDateString('fr-FR')} · ${esc(a.tag||'')} · 📍 ${esc(a.region||'National')}</div></div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;"><select class="input" style="width:auto;padding:5px 8px;font-size:11px;" title="Région" onchange="setActuRegion('${a.id}',this.value)">${regionOptions(a.region)}</select><button class="btn btn-outline btn-xs" style="width:auto;" onclick="notifyActu(adminActus[${i}].title)">📢 Notifier</button><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);" onclick="delActu('${a.id}')">Supprimer</button></div></div><div class="card-body">${esc(a.content)}</div></div>`).join('');
 }
 async function addActu(){
   const title=document.getElementById('nActuTitle').value.trim();
   const content=document.getElementById('nActuText').value.trim();
   const tag=document.getElementById('nActuTag').value.trim();
+  const region=document.getElementById('nActuRegion').value||null;
   const fileInput=document.getElementById('nActuImg');
   if(!title||!content){toast('Titre et contenu requis','err');return;}
   let image_url=null;
@@ -313,10 +322,25 @@ async function addActu(){
     const {error:upErr}=await sb.storage.from('actus-images').upload(path,file);
     if(!upErr){const {data:{publicUrl}}=sb.storage.from('actus-images').getPublicUrl(path);image_url=publicUrl;}
   }
-  await sb.from('unsa_actus').insert({title,content,tag,image_url,created_by:adminUser.id});
-  sendPush('📰 Nouvelle actualité',title);
-  document.getElementById('nActuTitle').value='';document.getElementById('nActuText').value='';document.getElementById('nActuTag').value='';fileInput.value='';
+  const {error}=await sb.from('unsa_actus').insert({title,content,tag,region,image_url,created_by:adminUser.id});
+  if(error){toast('Erreur : '+error.message,'err');return;}
+  lastActuTitle=title;
+  toast('Actualité publiée — cliquez sur 📢 pour notifier les abonnés','ok');
+  document.getElementById('nActuTitle').value='';document.getElementById('nActuText').value='';document.getElementById('nActuTag').value='';document.getElementById('nActuRegion').value='';fileInput.value='';
   loadActus();
+}
+async function setActuRegion(id,region){
+  const {error}=await sb.from('unsa_actus').update({region:region||null}).eq('id',id);
+  if(error){toast('Erreur : '+error.message,'err');return;}
+  toast('Région mise à jour','ok');loadActus();
+}
+// Notification push manuelle : titre passé en paramètre, sinon titre saisi, sinon dernière actu publiée
+async function notifyActu(title){
+  title=title||document.getElementById('nActuTitle').value.trim()||lastActuTitle||(adminActus[0]&&adminActus[0].title);
+  if(!title){toast('Aucune actualité à notifier','err');return;}
+  if(!confirm('Envoyer une notification push à tous les abonnés ?\n\n« Nouvelle actualité : '+title+' »'))return;
+  const ok=await sendPush('UNSA Énergies','Nouvelle actualité : '+title);
+  toast(ok?'📢 Notification envoyée aux abonnés':'Échec de l\'envoi de la notification',ok?'ok':'err');
 }
 async function delActu(id){if(!confirm('Supprimer ?'))return;await sb.from('unsa_actus').delete().eq('id',id);loadActus();}
 

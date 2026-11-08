@@ -1,4 +1,4 @@
-const CACHE_NAME = 'unsa-energie-v29';
+const CACHE_NAME = 'unsa-energie-v30';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -49,7 +49,7 @@ self.addEventListener('fetch', event => {
 });
 
 self.addEventListener('push', event => {
-  let data = { title: 'UNSA Énergie', body: 'Nouvelle notification', icon: './icons/icon-192x192.png' };
+  let data = { title: 'UNSA Énergies', body: 'Nouvelle notification', icon: './icons/icon-192x192.png' };
   try { data = { ...data, ...event.data.json() }; } catch (e) {}
   event.waitUntil(
     self.registration.showNotification(data.title, {
