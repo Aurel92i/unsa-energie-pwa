@@ -61,6 +61,14 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--white);colo
 .auth-overlay.hidden{display:none;}
 .auth-overlay{overflow-y:auto;}
 .auth-close{position:absolute;top:18px;right:18px;}
+.push-banner{position:fixed;left:16px;right:16px;bottom:84px;z-index:95;max-width:440px;margin:0 auto;background:var(--white);border:1px solid var(--g200);border-radius:var(--r-lg);box-shadow:var(--sh-lg);padding:16px 18px;display:none;gap:14px;align-items:center;}
+.push-banner.show{display:flex;}
+.push-banner .pb-icon{font-size:26px;flex-shrink:0;}
+.push-banner h4{font-family:'Outfit';font-weight:700;font-size:14px;color:var(--g900);margin-bottom:2px;}
+.push-banner p{font-size:12px;color:var(--g500);line-height:1.4;}
+.push-banner .pb-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
+.push-banner .pb-yes{background:var(--cyan);color:#fff;border:none;border-radius:100px;padding:8px 14px;font-family:'Outfit';font-weight:700;font-size:12px;cursor:pointer;}
+.push-banner .pb-no{background:none;border:none;color:var(--g400);font-family:'Outfit';font-weight:600;font-size:11px;cursor:pointer;}
 .auth-links{margin-top:24px;display:flex;flex-direction:column;gap:12px;align-items:center;}
 .auth-links button{background:none;border:none;font-family:'Outfit';font-weight:600;font-size:13px;cursor:pointer;color:var(--g500);padding:4px 8px;}
 .auth-links button:hover{color:var(--g900);}
@@ -485,6 +493,7 @@ html[data-theme="dark"] .back-link{color:var(--cyan);}
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="push-banner" id="pushBanner" role="dialog" aria-label="Notifications"><div class="pb-icon">🔔</div><div style="flex:1;"><h4>Ne manquez aucune actu</h4><p>Recevez une notification à chaque nouvelle actualité de l'UNSA Énergies.</p></div><div class="pb-actions"><button type="button" class="pb-yes" onclick="enablePush()">Activer</button><button type="button" class="pb-no" onclick="dismissPushBanner()">Plus tard</button></div></div>
 
 <!-- ACTU DETAIL MODAL -->
 <div class="overlay" id="actuOverlay" onclick="if(event.target===this)this.classList.remove('open')"><div class="modal" style="max-width:600px;">
@@ -662,9 +671,10 @@ const MFR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','S
   if(data.session){
     user=data.session.user;await loadProfile();
     // Session d'un compte non adhérent : on revient en mode visiteur
-    if(isAdh())initPush();else{await sb.auth.signOut();user=null;profile=null;}
+    if(!isAdh()){await sb.auth.signOut();user=null;profile=null;}
   }
   buildNav();
+  initPush();
   // Dismiss splashscreen - Phase 1: logo (2s) -> Phase 2: team (4s or click)
   setTimeout(()=>{const p1=document.getElementById('splashPhase1');if(p1)p1.classList.add('fade');},2000);
   setTimeout(()=>{dismissSplash();},6000);
@@ -1014,32 +1024,35 @@ function renderEvCard(e){
 const VAPID_PUBLIC='BPVvfkZOxg9HUz98VjLwyovTN-7-vr4rfCU-oTOQlNI1PbhbZ1eZI2-VvTTZFfqQOQaHexI7tt7gfMF8OHgP71I';
 function urlB64ToUint8(b64){const p='='.repeat((4-b64.length%4)%4);const raw=atob(b64.replace(/-/g,'+').replace(/_/g,'/').concat(p));return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));}
 
+function pushSupported(){return 'Notification' in window&&'serviceWorker' in navigator&&'PushManager' in window;}
+// Notifications pour tous les visiteurs : abonnement silencieux si déjà autorisé, sinon bandeau d'invitation
 async function initPush(){
-  if(!('Notification' in window)||!('serviceWorker' in navigator)||!('PushManager' in window))return;
-  if(Notification.permission==='default'){
-    // Wait a bit before asking, don't be aggressive
-    setTimeout(async()=>{
-      const perm=await Notification.requestPermission();
-      if(perm==='granted')await subscribePush();
-    },5000);
-  }else if(Notification.permission==='granted'){
-    await subscribePush();
-  }
+  if(!pushSupported())return;
+  if(Notification.permission==='granted'){await subscribePush();return;}
+  if(Notification.permission!=='default')return;
+  let snoozed=0;try{snoozed=+localStorage.getItem('unsa-push-snooze')||0;}catch(e){}
+  if(Date.now()<snoozed)return;
+  clearTimeout(window._pushT);
+  window._pushT=setTimeout(()=>{const b=document.getElementById('pushBanner');if(b&&Notification.permission==='default')b.classList.add('show');},8000);
+}
+async function enablePush(){
+  document.getElementById('pushBanner').classList.remove('show');
+  const perm=await Notification.requestPermission();
+  if(perm==='granted'){const ok=await subscribePush();toast(ok?'🔔 Notifications activées':"Impossible d'activer les notifications",ok?'ok':'err');}
+}
+function dismissPushBanner(){
+  document.getElementById('pushBanner').classList.remove('show');
+  try{localStorage.setItem('unsa-push-snooze',String(Date.now()+14*864e5));}catch(e){}
 }
 async function subscribePush(){
   try{
     const reg=await navigator.serviceWorker.ready;
     let sub=await reg.pushManager.getSubscription();
-    if(!sub){
-      sub=await reg.pushManager.subscribe({
-        userVisibleOnly:true,
-        applicationServerKey:urlB64ToUint8(VAPID_PUBLIC)
-      });
-    }
-    // Save subscription to Supabase
-    await sb.from('unsa_push_subscriptions').upsert({user_id:user.id,subscription:sub.toJSON()},{onConflict:'user_id'});
-    console.log('Push subscription saved');
-  }catch(e){console.log('Push subscription failed:',e);}
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64ToUint8(VAPID_PUBLIC)});
+    const {error}=await sb.rpc('unsa_save_push_subscription',{p_sub:sub.toJSON()});
+    if(error)throw error;
+    return true;
+  }catch(e){console.log('Push subscription failed:',e);return false;}
 }
 
 // PWA Service Worker

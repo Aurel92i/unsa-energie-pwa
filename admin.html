@@ -128,7 +128,7 @@ textarea.input{resize:vertical;min-height:80px;}
 <!-- ACTUS -->
 <div class="panel" id="pan-actus">
 <div class="panel-hd"><h2>Actualités</h2></div>
-<div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Nouvelle actualité</h4><div class="fg"><label>Titre</label><input class="input" id="nActuTitle"/></div><div class="fg"><label>Contenu</label><textarea class="input" id="nActuText"></textarea></div><div class="form-row"><div class="fg"><label>Tag</label><input class="input" id="nActuTag" placeholder="Salaires, Télétravail..."/></div><div class="fg"><label>Image (optionnel)</label><input class="input" id="nActuImg" type="file" accept="image/*" style="padding:8px;"/></div></div><div class="fg"><label>Région</label><select class="input region-select" id="nActuRegion"><option value="">— National (toutes régions) —</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addActu()">Publier</button><button class="btn btn-outline btn-sm" style="width:auto;" onclick="notifyActu()" title="Envoie une notification push à tous les abonnés">📢 Notifier les abonnés</button></div></div>
+<div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Nouvelle actualité</h4><div class="fg"><label>Titre</label><input class="input" id="nActuTitle"/></div><div class="fg"><label>Contenu</label><textarea class="input" id="nActuText"></textarea></div><div class="form-row"><div class="fg"><label>Tag</label><input class="input" id="nActuTag" placeholder="Salaires, Télétravail..."/></div><div class="fg"><label>Image (optionnel)</label><input class="input" id="nActuImg" type="file" accept="image/*" style="padding:8px;"/></div></div><div class="fg"><label>Région</label><select class="input region-select" id="nActuRegion"><option value="">— National (toutes régions) —</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addActu()">Publier</button><button class="btn btn-outline btn-sm" style="width:auto;" onclick="notifyActu()" title="Renvoie une notification push à tous les abonnés (envoyée automatiquement à la publication)">📢 Renvoyer la notification</button></div></div>
 <div id="actusList" style="margin-top:18px;"></div>
 </div>
 <!-- DOCUMENTS ADMIN -->
@@ -144,20 +144,28 @@ textarea.input{resize:vertical;min-height:80px;}
 </div>
 <script>
 function toast(msg,type){const t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.className='toast show'+(type?' toast-'+type:'');clearTimeout(window._toastT);window._toastT=setTimeout(()=>t.classList.remove('show'),3500);}
+const SUPA_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYWZ2amhpcHJkbGR0d21rdHVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMTYzMzcsImV4cCI6MjA4NjU5MjMzN30.YP9_K6srLfHq86EsD4E-StRx_UJxwoboDz3Er4tw2yk";
 const sb=supabase.createClient("https://aiafvjhiprdldtwmktur.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYWZ2amhpcHJkbGR0d21rdHVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMTYzMzcsImV4cCI6MjA4NjU5MjMzN30.YP9_K6srLfHq86EsD4E-StRx_UJxwoboDz3Er4tw2yk");
 let adminUser=null,adminProfile=null,activeConvId=null,adminMsgChannel=null;
 const PUSH_URL='https://aiafvjhiprdldtwmktur.supabase.co/functions/v1/send-push';
 
+// Envoi push via la fonction send-push (authentifié avec la session admin)
 async function sendPush(title,body,userIds,url){
   try{
+    const {data:{session}}=await sb.auth.getSession();
+    if(!session)return {ok:false,error:'Session expirée'};
     const r=await fetch(PUSH_URL,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':SUPA_ANON},
       body:JSON.stringify({title,body,user_ids:userIds||null,url:url||'https://aurel92i.github.io/unsa-energie-pwa/'})
     });
-    return r.ok;
-  }catch(e){console.log('Push send error',e);return false;}
+    const res=await r.json().catch(()=>({}));
+    return {ok:r.ok,...res};
+  }catch(e){console.log('Push send error',e);return {ok:false,error:e.message};}
 }
+// Destinataires « adhérents uniquement » (documents, événements)
+async function adherentIds(){const {data}=await sb.from('unsa_profiles').select('id').eq('adherent_verified',true);return (data||[]).map(p=>p.id);}
+function pushToast(r){toast(r.ok?(r.total?`📢 Notification envoyée (${r.sent}/${r.total} appareil${r.total>1?'s':''})`:'Aucun appareil abonné pour le moment'):'Échec de la notification : '+(r.error||'erreur'),r.ok?'ok':'err');}
 
 const REGIONS=["Auvergne-Rhône-Alpes", "Bourgogne-Franche-Comté", "Bretagne", "Centre-Val de Loire", "Corse", "Grand Est", "Hauts-de-France", "Île-de-France", "Normandie", "Nouvelle-Aquitaine", "Occitanie", "Pays de la Loire", "Provence-Alpes-Côte d'Azur", "Guadeloupe", "Guyane", "Martinique", "Mayotte", "La Réunion"];
 function regionOptions(sel){return '<option value="">National</option>'+REGIONS.map(r=>`<option${r===sel?' selected':''}>${esc(r)}</option>`).join('');}
@@ -352,7 +360,8 @@ async function addActu(){
   const {error}=await sb.from('unsa_actus').insert({title,content,tag,region,image_url,created_by:adminUser.id});
   if(error){toast('Erreur : '+error.message,'err');return;}
   lastActuTitle=title;
-  toast('Actualité publiée — cliquez sur 📢 pour notifier les abonnés','ok');
+  toast('Actualité publiée — envoi de la notification…','ok');
+  sendPush('UNSA Énergies','Nouvelle actualité : '+title).then(pushToast);
   document.getElementById('nActuTitle').value='';document.getElementById('nActuText').value='';document.getElementById('nActuTag').value='';document.getElementById('nActuRegion').value='';fileInput.value='';
   loadActus();
 }
@@ -365,9 +374,8 @@ async function setActuRegion(id,region){
 async function notifyActu(title){
   title=title||document.getElementById('nActuTitle').value.trim()||lastActuTitle||(adminActus[0]&&adminActus[0].title);
   if(!title){toast('Aucune actualité à notifier','err');return;}
-  if(!confirm('Envoyer une notification push à tous les abonnés ?\n\n« Nouvelle actualité : '+title+' »'))return;
-  const ok=await sendPush('UNSA Énergies','Nouvelle actualité : '+title);
-  toast(ok?'📢 Notification envoyée aux abonnés':'Échec de l\'envoi de la notification',ok?'ok':'err');
+  if(!confirm('Renvoyer une notification push à tous les abonnés ?\n\n« Nouvelle actualité : '+title+' »'))return;
+  pushToast(await sendPush('UNSA Énergies','Nouvelle actualité : '+title));
 }
 async function delActu(id){if(!confirm('Supprimer ?'))return;await sb.from('unsa_actus').delete().eq('id',id);loadActus();}
 
@@ -389,7 +397,7 @@ async function addDoc(){
     created_by:adminUser.id
   });
   document.getElementById('nDocTitle').value='';document.getElementById('nDocDesc').value='';fileInput.value='';
-  toast('Document publié','ok');sendPush('📁 Nouveau document',title);loadAdminDocs();
+  toast('Document publié','ok');adherentIds().then(ids=>ids.length&&sendPush('📁 Nouveau document',title,ids));loadAdminDocs();
 }
 async function loadAdminDocs(){
   const {data}=await sb.from('unsa_documents').select('*').order('created_at',{ascending:false});
@@ -413,7 +421,7 @@ async function addEvent(){
   });
   const evDate=document.getElementById('nEvDate').value;
   document.getElementById('nEvTitle').value='';document.getElementById('nEvDate').value='';document.getElementById('nEvTime').value='';document.getElementById('nEvLoc').value='';document.getElementById('nEvDesc').value='';
-  toast('Événement publié','ok');sendPush('📅 Nouvel événement',title+(evDate?' — '+evDate:''));loadAdminEvents();
+  toast('Événement publié','ok');adherentIds().then(ids=>ids.length&&sendPush('📅 Nouvel événement',title+(evDate?' — '+evDate:''),ids));loadAdminEvents();
 }
 async function loadAdminEvents(){
   const {data}=await sb.from('unsa_events').select('*').order('event_date',{ascending:true});
