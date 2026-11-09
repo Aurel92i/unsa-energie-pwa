@@ -1,4 +1,4 @@
-const CACHE_NAME = 'unsa-energie-v33';
+const CACHE_NAME = 'unsa-energie-v34';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

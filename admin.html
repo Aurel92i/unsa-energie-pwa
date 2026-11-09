@@ -92,6 +92,7 @@ textarea.input{resize:vertical;min-height:80px;}
 <a onclick="showP('adhreq',this)">📝 Demandes d'adhésion <span class="badge" id="rBadge">0</span></a>
 <a onclick="showP('verifs',this)">👥 Comptes du site</a>
 <a onclick="showP('actus',this)">📰 Actualités</a>
+<a onclick="showP('regions',this)">🗺️ Régions & équipes</a>
 <a onclick="showP('faq',this)">❓ FAQ</a>
 <a onclick="showP('documents',this)">📁 Documents</a>
 <a onclick="showP('events',this)">📅 Événements</a>
@@ -107,9 +108,9 @@ textarea.input{resize:vertical;min-height:80px;}
 <div id="dashRecent"></div>
 </div>
 <!-- VERIFICATIONS -->
-<div class="panel" id="pan-verifs"><div class="panel-hd"><h2>Comptes du site</h2><p>Les comptes dont l'e-mail figure dans la base adhérents sont reconnus automatiquement à la connexion. Vous pouvez aussi valider ou retirer un statut manuellement.</p></div><div id="vList"></div></div>
+<div class="panel" id="pan-verifs"><div class="panel-hd"><h2>Comptes du site</h2><p>Un compte créé depuis le site est activé lorsque vous validez sa demande dans « Demandes d'adhésion ». Vous pouvez aussi valider ou retirer un statut manuellement ici.</p></div><div id="vList"></div></div>
 <!-- DEMANDES D'ADHÉSION -->
-<div class="panel" id="pan-adhreq"><div class="panel-hd"><h2>Demandes d'adhésion</h2><p>Demandes déposées depuis la page « Adhérer ». Une demande validée ajoute la personne à la base adhérents : elle pourra ensuite créer son compte et accéder à l'espace adhérent.</p></div>
+<div class="panel" id="pan-adhreq"><div class="panel-hd"><h2>Demandes d'adhésion</h2><p><strong>Création de compte</strong> : vérifiez que la personne est bien adhérente (indicateur « base adhérents »), puis validez pour activer son accès. <strong>Demande d'adhésion</strong> (page « Adhérer ») : une fois validée, la personne est ajoutée à la base adhérents.</p></div>
 <div id="adhReqList"></div></div>
 <!-- BASE ADHÉRENTS -->
 <div class="panel" id="pan-members"><div class="panel-hd"><h2>Base adhérents</h2><p>Retrouvez, contactez ou répondez à un adhérent. Données confidentielles : accès réservé aux administrateurs.</p></div>
@@ -121,6 +122,8 @@ textarea.input{resize:vertical;min-height:80px;}
 </div>
 <div id="mCount" class="card-meta" style="margin:4px 0 12px;"></div>
 <div id="membersList"></div></div>
+<!-- RÉGIONS ADMIN -->
+<div class="panel" id="pan-regions"><div class="panel-hd"><h2>Régions & équipes</h2><p>Adresse de contact utilisée par « Nous contacter » et équipe affichée dans « Qui sommes-nous → Les équipes ». Une ligne par personne : « Prénom NOM — Rôle ».</p></div><div id="regionsAdminList"></div></div>
 <!-- FAQ ADMIN -->
 <div class="panel" id="pan-faq"><div class="panel-hd"><h2>FAQ</h2><p>Questions fréquentes affichées dans l'onglet FAQ du site.</p></div>
 <div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 id="faqFormTitle" style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Nouvelle question</h4><input type="hidden" id="faqId"/><div class="fg"><label>Question</label><input class="input" id="faqQ"/></div><div class="fg"><label>Réponse</label><textarea class="input" id="faqA" style="min-height:110px;"></textarea></div><div class="fg" style="max-width:180px;"><label>Ordre d'affichage</label><input class="input" type="number" id="faqPos" value="0"/></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="saveFaq()">Enregistrer</button><button class="btn btn-outline btn-sm" style="width:auto;" onclick="resetFaqForm()">Annuler</button></div></div>
@@ -129,7 +132,7 @@ textarea.input{resize:vertical;min-height:80px;}
 <div class="panel" id="pan-actus">
 <div class="panel-hd"><h2>Actualités</h2></div>
 <div class="card" style="border:2px dashed var(--cyan);background:var(--cyan-light);"><h4 style="font-family:'Outfit';font-weight:700;font-size:15px;color:var(--cyan-dark);margin-bottom:14px;">Nouvelle actualité</h4><div class="fg"><label>Titre</label><input class="input" id="nActuTitle"/></div><div class="fg"><label>Contenu</label><textarea class="input" id="nActuText"></textarea></div><div class="form-row"><div class="fg"><label>Tag</label><input class="input" id="nActuTag" placeholder="Salaires, Télétravail..."/></div><div class="fg"><label>Image (optionnel)</label><input class="input" id="nActuImg" type="file" accept="image/*" style="padding:8px;"/></div></div><div class="fg"><label>Région</label><select class="input region-select" id="nActuRegion"><option value="">— National (toutes régions) —</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="addActu()">Publier</button><button class="btn btn-outline btn-sm" style="width:auto;" onclick="notifyActu()" title="Renvoie une notification push à tous les abonnés (envoyée automatiquement à la publication)">📢 Renvoyer la notification</button></div></div>
-<div id="actusList" style="margin-top:18px;"></div>
+<div style="display:flex;justify-content:flex-end;margin-top:14px;"><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="delDemoActus()">🗑️ Supprimer les actus d'exemple</button></div><div id="actusList" style="margin-top:12px;"></div>
 </div>
 <!-- DOCUMENTS ADMIN -->
 <div class="panel" id="pan-documents"><div class="panel-hd"><h2>Documents & Tracts</h2></div>
@@ -187,7 +190,7 @@ async function adminLogin(){
   loadDash();
 }
 async function adminLogout(){await sb.auth.signOut();location.reload();}
-function showP(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('pan-'+id).classList.add('active');document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');if(id==='dash')loadDash();if(id==='members')loadMembers();if(id==='adhreq')loadAdhReqs();if(id==='verifs')loadVerifs();if(id==='actus')loadActus();if(id==='faq')loadFaqAdmin();if(id==='documents')loadAdminDocs();if(id==='events')loadAdminEvents();}
+function showP(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('pan-'+id).classList.add('active');document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');if(id==='dash')loadDash();if(id==='members')loadMembers();if(id==='adhreq')loadAdhReqs();if(id==='verifs')loadVerifs();if(id==='actus')loadActus();if(id==='faq')loadFaqAdmin();if(id==='regions')loadRegionsAdmin();if(id==='documents')loadAdminDocs();if(id==='events')loadAdminEvents();}
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 fillRegionSelects();
 
@@ -273,25 +276,54 @@ async function importMembers(ev){
 
 // ═══ DEMANDES D'ADHÉSION ═══
 async function refreshReqBadge(){const {count}=await sb.from('unsa_adhesion_requests').select('*',{count:'exact',head:true}).eq('status','pending');document.getElementById('rBadge').textContent=count||0;}
+let adminReqs=[];
 async function loadAdhReqs(){
-  const {data,error}=await sb.from('unsa_adhesion_requests').select('*').order('created_at',{ascending:false});
+  const [{data,error},{data:mm}]=await Promise.all([
+    sb.from('unsa_adhesion_requests').select('*').order('created_at',{ascending:false}),
+    sb.from('unsa_members').select('email_norm')
+  ]);
   if(error){toast('Erreur : '+error.message,'err');return;}
-  const reqs=data||[];
-  const pending=reqs.filter(r=>r.status==='pending'),done=reqs.filter(r=>r.status!=='pending');
+  adminReqs=data||[];
+  const base=new Set((mm||[]).map(m=>m.email_norm));
+  const pending=adminReqs.filter(r=>r.status==='pending'),done=adminReqs.filter(r=>r.status!=='pending');
   document.getElementById('rBadge').textContent=pending.length;
-  const info=r=>`<div class="card-meta">${esc(r.email)}${r.telephone?' · '+esc(r.telephone):''} · ${esc(r.statut_pro||'')} · ${esc(r.formule||'')} · le ${new Date(r.created_at).toLocaleDateString('fr-FR')}</div>`;
+  const kindTag=r=>r.kind==='compte'?'<span class="badge-s" style="background:var(--cyan-light);color:var(--cyan-dark);margin-left:6px;">Création de compte</span>':'<span class="badge-s" style="background:var(--mag-light);color:var(--mag-dark);margin-left:6px;">Demande d\'adhésion</span>';
+  const baseTag=r=>base.has((r.email||'').toLowerCase())?'<span style="color:#059669;font-weight:600;">📇 Dans la base adhérents</span>':'<span style="color:#D97706;font-weight:600;">⚠️ Hors base adhérents</span>';
+  const info=r=>`<div class="card-meta">${esc(r.email)}${r.telephone?' · '+esc(r.telephone):''}${r.statut_pro?' · '+esc(r.statut_pro):''}${r.formule?(r.kind==='compte'?' · 📍 ':' · ')+esc(r.formule):''} · le ${new Date(r.created_at).toLocaleDateString('fr-FR')}</div><div class="card-meta" style="margin-top:4px;">${baseTag(r)}</div>`;
   const contact=r=>`<a class="btn btn-outline btn-xs" style="width:auto;text-decoration:none;" href="mailto:${encodeURIComponent(r.email).replace(/%40/g,'@')}">✉ Écrire</a>${r.telephone?`<a class="btn btn-outline btn-xs" style="width:auto;text-decoration:none;" href="tel:${esc(r.telephone)}">📞 Appeler</a>`:''}`;
   document.getElementById('adhReqList').innerHTML=
     '<h4 style="font-family:Outfit;font-weight:700;font-size:15px;color:var(--mag);margin-bottom:12px;">⏳ En attente ('+pending.length+')</h4>'+
-    (pending.map(r=>`<div class="card" style="border-left:3px solid var(--mag);"><div class="card-hd"><div><div class="card-title">${esc(r.prenom)} ${esc(r.nom)}</div>${info(r)}</div><span class="badge-s b-pending">En attente</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;"><button class="btn btn-cyan btn-xs" style="width:auto;background:#10B981;" onclick="processAdh('${r.id}',true)">✅ Valider</button><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="processAdh('${r.id}',false)">✕ Décliner</button>${contact(r)}</div></div>`).join('')||'<div style="color:var(--g400);padding:14px;text-align:center;font-size:13px;margin-bottom:18px;">Aucune demande en attente.</div>')+
-    (done.length?'<h4 style="font-family:Outfit;font-weight:700;font-size:15px;color:var(--g500);margin:24px 0 12px;">Historique ('+done.length+')</h4>'+done.map(r=>`<div class="card"><div class="card-hd"><div><div class="card-title">${esc(r.prenom)} ${esc(r.nom)}</div>${info(r)}</div><span class="badge-s ${r.status==='approved'?'b-approved':'b-rejected'}">${r.status==='approved'?'Validée':'Déclinée'}</span></div></div>`).join(''):'');
+    (pending.map(r=>`<div class="card" style="border-left:3px solid var(--mag);"><div class="card-hd"><div><div class="card-title">${esc(r.prenom)} ${esc(r.nom)}${kindTag(r)}</div>${info(r)}</div><span class="badge-s b-pending">En attente</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;"><button class="btn btn-cyan btn-xs" style="width:auto;background:#10B981;" onclick="processAdh('${r.id}',true)">✅ ${r.kind==='compte'?'Valider l\'accès':'Valider'}</button><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);border-color:var(--mag);" onclick="processAdh('${r.id}',false)">✕ Décliner</button>${contact(r)}</div></div>`).join('')||'<div style="color:var(--g400);padding:14px;text-align:center;font-size:13px;margin-bottom:18px;">Aucune demande en attente.</div>')+
+    (done.length?'<h4 style="font-family:Outfit;font-weight:700;font-size:15px;color:var(--g500);margin:24px 0 12px;">Historique ('+done.length+')</h4>'+done.map(r=>`<div class="card"><div class="card-hd"><div><div class="card-title">${esc(r.prenom)} ${esc(r.nom)}${kindTag(r)}</div>${info(r)}</div><span class="badge-s ${r.status==='approved'?'b-approved':'b-rejected'}">${r.status==='approved'?'Validée':'Déclinée'}</span></div></div>`).join(''):'');
 }
 async function processAdh(id,approve){
-  if(!confirm(approve?'Valider cette demande ? La personne sera ajoutée à la base adhérents.':'Décliner cette demande ?'))return;
+  const r=adminReqs.find(x=>x.id===id)||{};
+  const q=r.kind==='compte'
+    ?(approve?'Activer l\'accès à l\'espace adhérent pour '+r.prenom+' '+r.nom+' ?':'Décliner la demande de compte de '+r.prenom+' '+r.nom+' ?')
+    :(approve?'Valider cette demande ? La personne sera ajoutée à la base adhérents.':'Décliner cette demande ?');
+  if(!confirm(q))return;
   const {error}=await sb.rpc('unsa_process_adhesion',{p_id:id,p_approve:approve});
   if(error){toast('Erreur : '+error.message,'err');return;}
-  toast(approve?'Demande validée : ajoutée à la base adhérents':'Demande déclinée','ok');
+  if(approve&&r.kind==='compte'&&r.user_id)sendPush('Accès adhérent validé ✅','Votre espace adhérent UNSA Énergies est maintenant accessible.',[r.user_id]);
+  toast(approve?(r.kind==='compte'?'Accès activé':'Demande validée : ajoutée à la base adhérents'):'Demande déclinée','ok');
   allMembers=[];loadAdhReqs();
+}
+
+// ═══ RÉGIONS ADMIN ═══
+let adminRegions=[];
+async function loadRegionsAdmin(){
+  const {data,error}=await sb.from('unsa_regions').select('*').order('sort');
+  if(error){toast('Erreur : '+error.message,'err');return;}
+  adminRegions=data||[];
+  document.getElementById('regionsAdminList').innerHTML=adminRegions.map((r,i)=>`<div class="card"><div class="card-title" style="margin-bottom:10px;">📍 ${esc(r.name)}</div><div class="fg"><label>E-mail de contact</label><input class="input" id="rgEmail${i}" type="email" value="${esc(r.email||'')}"/></div><div class="fg"><label>Équipe (une ligne par personne : Prénom NOM — Rôle)</label><textarea class="input" id="rgTeam${i}" style="min-height:96px;">${esc(r.team||'')}</textarea></div><button class="btn btn-cyan btn-sm" style="width:auto;" onclick="saveRegion(${i})">Enregistrer</button></div>`).join('')||'<div style="color:var(--g400);padding:18px;text-align:center;">Aucune région.</div>';
+}
+async function saveRegion(i){
+  const r=adminRegions[i];if(!r)return;
+  const email=document.getElementById('rgEmail'+i).value.trim(),team=document.getElementById('rgTeam'+i).value.trim();
+  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast('Adresse e-mail invalide','err');return;}
+  const {error}=await sb.from('unsa_regions').update({email:email||null,team:team||null,updated_at:new Date().toISOString()}).eq('name',r.name);
+  if(error){toast('Erreur : '+error.message,'err');return;}
+  toast('Région '+r.name+' enregistrée','ok');
 }
 
 // ═══ FAQ ADMIN ═══
@@ -340,7 +372,7 @@ let adminActus=[],lastActuTitle='';
 async function loadActus(){
   const {data}=await sb.from('unsa_actus').select('*').order('created_at',{ascending:false});
   adminActus=data||[];
-  document.getElementById('actusList').innerHTML=adminActus.map((a,i)=>`<div class="card"><div class="card-hd"><div style="display:flex;align-items:center;gap:12px;">${a.image_url?'<img src="'+a.image_url+'" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;"/>':''}<div><div class="card-title">${esc(a.title)}</div><div class="card-meta">${new Date(a.created_at).toLocaleDateString('fr-FR')} · ${esc(a.tag||'')} · 📍 ${esc(a.region||'National')}</div></div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;"><select class="input" style="width:auto;padding:5px 8px;font-size:11px;" title="Région" onchange="setActuRegion('${a.id}',this.value)">${regionOptions(a.region)}</select><button class="btn btn-outline btn-xs" style="width:auto;" onclick="notifyActu(adminActus[${i}].title)">📢 Notifier</button><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);" onclick="delActu('${a.id}')">Supprimer</button></div></div><div class="card-body">${esc(a.content)}</div></div>`).join('');
+  document.getElementById('actusList').innerHTML=adminActus.map((a,i)=>`<div class="card"><div class="card-hd"><div style="display:flex;align-items:center;gap:12px;">${a.image_url?'<img src="'+a.image_url+'" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;"/>':''}<div><div class="card-title">${esc(a.title)}</div><div class="card-meta">${new Date(a.created_at).toLocaleDateString('fr-FR')} · ${esc(a.tag||'')} · 📍 ${esc(a.region||'National')}${a.demo?' · <em>exemple</em>':''}</div></div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;"><select class="input" style="width:auto;padding:5px 8px;font-size:11px;" title="Région" onchange="setActuRegion('${a.id}',this.value)">${regionOptions(a.region)}</select><button class="btn btn-outline btn-xs" style="width:auto;" onclick="notifyActu(adminActus[${i}].title)">📢 Notifier</button><button class="btn btn-outline btn-xs" style="width:auto;color:var(--mag);" onclick="delActu('${a.id}')">Supprimer</button></div></div><div class="card-body">${esc(a.content)}</div></div>`).join('');
 }
 async function addActu(){
   const title=document.getElementById('nActuTitle').value.trim();
@@ -377,6 +409,7 @@ async function notifyActu(title){
   if(!confirm('Renvoyer une notification push à tous les abonnés ?\n\n« Nouvelle actualité : '+title+' »'))return;
   pushToast(await sendPush('UNSA Énergies','Nouvelle actualité : '+title));
 }
+async function delDemoActus(){if(!confirm('Supprimer toutes les actualités d\'exemple ?'))return;const {error}=await sb.from('unsa_actus').delete().eq('demo',true);if(error){toast('Erreur : '+error.message,'err');return;}toast('Actualités d\'exemple supprimées','ok');loadActus();}
 async function delActu(id){if(!confirm('Supprimer ?'))return;await sb.from('unsa_actus').delete().eq('id',id);loadActus();}
 
 // ═══ DOCUMENTS ADMIN ═══
